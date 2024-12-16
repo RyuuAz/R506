@@ -51,6 +51,13 @@ class ImageModel {
         }
     }
 
+    public void adjustBrightness(float factor) {
+        if (image != null) {
+            RescaleOp op = new RescaleOp(factor, 0, null);
+            image = op.filter(image, null);
+        }
+    }
+
     public void addText(String text, Font font, Color color, int x, int y) {
         if (image != null && text != null) {
             Graphics2D g2d = image.createGraphics();

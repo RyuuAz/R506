@@ -12,6 +12,8 @@ class ImageEditorView {
     private JFrame frame;
     private JLabel imageLabel;
     private JToolBar toolBar;
+    private JSlider brightnessSlider;
+    private JPanel sliderPanel;
 
     public ImageEditorView() {
         frame = new JFrame("PixelCraft Studio");
@@ -26,7 +28,18 @@ class ImageEditorView {
 
         toolBar = new JToolBar();
         mainPanel.add(toolBar, BorderLayout.NORTH);
-        
+
+        brightnessSlider = new JSlider(0, 200, 100);
+        brightnessSlider.setMajorTickSpacing(50);
+        brightnessSlider.setPaintTicks(true);
+        brightnessSlider.setPaintLabels(true);
+        brightnessSlider.setBorder(BorderFactory.createTitledBorder("Luminosité"));
+
+        sliderPanel = new JPanel(new BorderLayout());
+        sliderPanel.add(brightnessSlider, BorderLayout.CENTER);
+        sliderPanel.setVisible(false); // Caché par défaut
+        mainPanel.add(sliderPanel, BorderLayout.SOUTH);
+
         frame.add(mainPanel);
         frame.setVisible(true);
     }
@@ -43,5 +56,13 @@ class ImageEditorView {
 
     public JFrame getFrame() {
         return frame;
+    }
+
+    public JSlider getBrightnessSlider() {
+        return brightnessSlider;
+    }
+
+    public JPanel getSliderPanel() {
+        return sliderPanel;
     }
 }
