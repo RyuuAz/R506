@@ -1,15 +1,16 @@
-package Controller;
+package ControllerMax;
 
 import java.io.File;
 
 import javax.swing.JOptionPane;
+
+import ModeleMax.ImageModel;
+import VueMax.ImageView;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
-
-import Modele.ImageModel;
-import Vue.ImageView;
 
 
 public class ImageController {

@@ -1,12 +1,13 @@
-package Vue;
+package VueMax;
 
 import javax.swing.*;
+
+import ControllerMax.ImageController;
+import ModeleMax.ImageModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-
-import Controller.ImageController;
-import Modele.ImageModel;
 
 public class ImageView extends JFrame {
     private JLabel imageLabel;

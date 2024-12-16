@@ -1,6 +1,6 @@
 // ImageModel.java (Modèle pour manipuler l'image)
 
-package Modele;
+package ModeleMax;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import Controller.ImageController;
+import ControllerMax.ImageController;
 
 
 public class ImageModel {
