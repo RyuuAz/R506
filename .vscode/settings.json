@@ -4,5 +4,6 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "flatlaf-3.1.jar"
-    ]
+    ],
+    "java.format.settings.url": "eclipse-formatter.xml"
 }
