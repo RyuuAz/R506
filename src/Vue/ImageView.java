@@ -10,6 +10,12 @@ import Model.ImageModel;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -43,12 +49,31 @@ public class ImageView extends JFrame {
 
     public ImageView(ImageController controller) {
         setTitle("Image Editor");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        
+        setSize(800, 600);
         setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
 
         this.controller = controller;
         this.shape = null;
+
+        this.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                controller.setActiveView(ImageView.this); // Définit cette fenêtre comme active
+                System.out.println("Window gained focus");
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                controller.removeView(ImageView.this); // Retire la vue de la liste des vues
+            }
+        });
+        
+        
 
         imageLabel = new JLabel() {
             @Override
@@ -95,6 +120,8 @@ public class ImageView extends JFrame {
         JButton brightenButtonMoin = new JButton("ec -");
         JButton darkenButtonPlus = new JButton("as +");
         JButton darkenButtonMoin = new JButton("as -");
+        JButton copierButton = new JButton("Copier");
+        JButton collerButton = new JButton("Coller");
         JButton drawRectangleButton = new JButton("Rectangle");
         JButton drawCircleButton = new JButton("Circle");
 
@@ -127,6 +154,8 @@ public class ImageView extends JFrame {
         toolBar.add(darkenButtonPlus);
         toolBar.add(new JLabel("Contrast:"));
         toolBar.add(darkenButtonMoin);
+        toolBar.add(copierButton);
+        toolBar.add(collerButton);
         toolBar.add(drawRectangleButton);
         toolBar.add(drawCircleButton);
 
@@ -272,6 +301,19 @@ public class ImageView extends JFrame {
                 controller.adjustContrast(-10);
             }
         });
+/
+
+        copierButton.addActionListener(e -> {
+            if (controller != null) {
+                copyImage();
+            }
+        });
+
+        collerButton.addActionListener(e -> {
+            if (controller != null) {
+                controller.pasteImage(this);
+            }
+        });
 
         drawRectangleButton.addActionListener(e -> {
             if (controller != null) {
@@ -358,6 +400,10 @@ public class ImageView extends JFrame {
        this.image = image;
         imageLabel.setIcon(new ImageIcon(image));
         imageLabel.repaint();
+    }
+
+    public BufferedImage getImage() {
+        return image;
     }
 
     public void init() {
@@ -449,5 +495,14 @@ public class ImageView extends JFrame {
                 }
             }
         });
+    }
+    public void copyImage() {
+        int x1 = shape.getX();
+        int y1 = shape.getY();
+        int x2 = shape.getX() + shape.getWidth();
+        int y2 = shape.getY() + shape.getHeight();
+        BufferedImage image = this.image.getSubimage(x1, y1, x2 - x1, y2 - y1);
+
+        controller.copyImage(image);
     }
 }

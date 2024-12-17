@@ -34,6 +34,10 @@ public class ImageModel {
         return image;
     }
 
+    public void setImage(BufferedImage image) {
+        this.image = image;
+    }
+
     public void applyPaintBucket(int x, int y, Color newColor, int tolerance) {
         if (image == null) return;
         
