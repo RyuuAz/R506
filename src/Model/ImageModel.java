@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
@@ -35,39 +36,69 @@ public class ImageModel {
     }
 
     public void applyPaintBucket(int x, int y, Color newColor, int tolerance) {
-        if (image == null) return;
-        
+        if (image == null || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) {
+            return;
+        }
+
         int targetColor = image.getRGB(x, y);
+        int newColorRGB = newColor.getRGB();
+        
+        // Vérification : si la couleur cible est la même que la nouvelle, inutile de continuer
+        if (targetColor == newColorRGB) {
+            return;
+        }
+
         boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        floodFill(x, y, targetColor, newColor.getRGB(), tolerance, visited);
+        floodFillIterative(x, y, targetColor, newColorRGB, tolerance, visited);
     }
 
-    private void floodFill(int x, int y, int targetColor, int newColor, int tolerance, boolean[][] visited) {
-        if (x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) return;
-        if (visited[x][y]) return;
-        visited[x][y] = true;
+    private void floodFillIterative(int x, int y, int targetColor, int newColor, int tolerance, boolean[][] visited) {
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-        int currentColor = image.getRGB(x, y);
-        if (!isWithinTolerance(targetColor, currentColor, tolerance)) return;
+        Stack<Point> stack = new Stack<>();
+        stack.push(new Point(x, y));
 
-        image.setRGB(x, y, newColor);
+        while (!stack.isEmpty()) {
+            Point p = stack.pop();
+            int cx = p.x;
+            int cy = p.y;
 
-        floodFill(x + 1, y, targetColor, newColor, tolerance, visited);
-        floodFill(x - 1, y, targetColor, newColor, tolerance, visited);
-        floodFill(x, y + 1, targetColor, newColor, tolerance, visited);
-        floodFill(x, y - 1, targetColor, newColor, tolerance, visited);
+            if (cx < 0 || cy < 0 || cx >= width || cy >= height) {
+                continue;
+            }
+            if (visited[cx][cy]) {
+                continue;
+            }
+
+            visited[cx][cy] = true;
+
+            int currentColor = image.getRGB(cx, cy);
+            if (!isWithinTolerance(targetColor, currentColor, tolerance)) {
+                continue;
+            }
+
+            image.setRGB(cx, cy, newColor);
+
+            // Ajout des voisins dans la pile
+            stack.push(new Point(cx + 1, cy));
+            stack.push(new Point(cx - 1, cy));
+            stack.push(new Point(cx, cy + 1));
+            stack.push(new Point(cx, cy - 1));
+        }
     }
 
     private boolean isWithinTolerance(int color1, int color2, int tolerance) {
-        int r1 = (color1 / 256) / 256;
-		int g1 = (color1 / 256) % 256;
-		int b1 = color1 % 256;
+        int r1 = (color1 >> 16) & 0xFF;
+        int g1 = (color1 >> 8) & 0xFF;
+        int b1 = color1 & 0xFF;
 
-		int r2 = (color2 / 256) / 256;
-		int g2 = (color2 / 256) % 256;
-		int b2 = color2 % 256;
+        int r2 = (color2 >> 16) & 0xFF;
+        int g2 = (color2 >> 8) & 0xFF;
+        int b2 = color2 & 0xFF;
 
-		return Math.sqrt(Math.pow(r1-r2, 2) + Math.pow(g1-g2, 2) + Math.pow(b1-b2, 2)) < tolerance;
+        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+        return distance <= tolerance;
     }
 
     // Appliquer une rotation
