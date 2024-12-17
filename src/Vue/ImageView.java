@@ -29,8 +29,7 @@ public class ImageView extends JFrame {
     private boolean isPickingColor;
     private boolean isPainting;
     private JPanel colorDisplayPanel;
-
-    public ImageView() {
+    
     private Shape shape;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;

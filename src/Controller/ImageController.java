@@ -5,7 +5,7 @@ import java.io.File;
 import javax.swing.JOptionPane;
 
 import java.awt.event.*;
-import VueMax.*;
+import Vue.*;
 
 
 import Model.ImageModel;
