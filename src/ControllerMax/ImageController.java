@@ -4,23 +4,29 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
+import java.awt.event.*;
+import VueMax.*;
+
+
 import ModeleMax.ImageModel;
-import VueMax.ImageView;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
-
+import java.awt.Point;
 
 public class ImageController {
     private ImageModel model;
     private ImageView view;
     private BufferedImage image;
+    private boolean isDrawingRectangle = false; // Indique si l'utilisateur dessine une forme
+    private boolean isDrawingCircle = false;
+    private Point startPoint;
 
-    public ImageController(ImageModel model, ImageView view) {
-        this.model = model;
-        this.view = view;
+    public ImageController() {
+        this.model = new ImageModel();
+        this.view = new ImageView(this);
     }
 
     public void openImage(File file) {
@@ -28,7 +34,8 @@ public class ImageController {
             model.loadImageFromFile(file);
             view.updateImage(model.getImage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Failed to open image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view, "Failed to open image: " + e.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -37,7 +44,8 @@ public class ImageController {
             String format = "png"; // Par défaut, on choisit PNG
             model.saveImageToFile(file, format);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Failed to save image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view, "Failed to save image: " + e.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -47,7 +55,8 @@ public class ImageController {
     }
 
     public void rotate(boolean clockwise) {
-        if (image == null) return;
+        if (image == null)
+            return;
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage rotatedImage = new BufferedImage(height, width, image.getType());
@@ -88,14 +97,10 @@ public class ImageController {
         view.updateImage(model.getImage());
     }
 
+    
+    
+
     public static void main(String[] args) {
-        ImageModel model = new ImageModel();
-        ImageView view = new ImageView();
-        ImageController controller = new ImageController(model, view);
-
-        view.setController(controller);
-        view.setModel(model);
-
-        view.setVisible(true);
+       new ImageController();
     }
 }
