@@ -1,6 +1,7 @@
 package VueMax;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.*;
 
@@ -17,6 +18,7 @@ import java.awt.event.MouseListener;
 
 public class ImageView extends JFrame {
     private JLabel imageLabel;
+    private JLabel affichJLabel;
     private ImageController controller;
     private Shape shape;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
@@ -26,6 +28,9 @@ public class ImageView extends JFrame {
     private boolean isDrawingCircle = false;
     private int clickX, clickY;
 
+    private BufferedImage image;
+
+
     public ImageView(ImageController controller) {
         setTitle("Image Editor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,6 +39,11 @@ public class ImageView extends JFrame {
 
         this.controller = controller;
         this.shape = null;
+
+        this.affichJLabel = new JLabel("Hello World");
+
+        if (this.image != null) {
+        }
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,6 +55,9 @@ public class ImageView extends JFrame {
                     super.paintComponent(g);
                     Graphics2D g2d = (Graphics2D) g;
                     currentShape.draw(g2d);
+                } else if ( imageLabel.getIcon() != null) {
+                    super.paintComponent(g);
+                    g.drawImage(image, 0, 0, null);
                 }
             }
         };
@@ -180,6 +193,9 @@ public class ImageView extends JFrame {
     private void handleOpenImage(ActionEvent e) {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
+            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+            "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+            fileChooser.setFileFilter(imageFilter);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 controller.openImage(fileChooser.getSelectedFile());
@@ -230,7 +246,9 @@ public class ImageView extends JFrame {
     }
 
     public void updateImage(BufferedImage image) {
+       this.image = image;
         imageLabel.setIcon(new ImageIcon(image));
+        imageLabel.repaint();
     }
 
     public void init() {
