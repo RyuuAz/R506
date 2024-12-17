@@ -2,25 +2,21 @@ package Vue;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
+import com.formdev.flatlaf.FlatDarkLaf;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 
 import Controller.ImageController;
 import Model.ImageModel;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseListener;
-
 public class ImageView extends JFrame {
+
     private JLabel imageLabel;
     private JLabel affichJLabel;
     private ImageController controller;
@@ -42,13 +38,19 @@ public class ImageView extends JFrame {
 
 
     public ImageView(ImageController controller) {
-        setTitle("Image Editor");
+        setTitle("Pix.net");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
 
         this.controller = controller;
-        this.shape = null;
+
+        // Initialisation de FlatLaf (par défaut Light)
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
         imageLabel = new JLabel() {
             @Override
@@ -69,73 +71,121 @@ public class ImageView extends JFrame {
             }
         };
 
+        this.shape = null;
+
+        // Créer un panneau pour afficher l'image
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setVerticalAlignment(JLabel.CENTER);
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
 
-        JToolBar toolBar = new JToolBar();
-        JButton openButton = new JButton("Ouvrir");
-        JButton saveButton = new JButton("Sauvegarder");
-        JButton paintBucketButton = new JButton("Seau de peinture");
+        // Créer la barre de menus
+        JMenuBar menuBar = new JMenuBar();
 
-        // Création du panneau pour afficher la couleur sélectionnée
+        // Menu Fichier
+        JMenu fileMenu = new JMenu("Fichier");
+        JMenuItem openItem = new JMenuItem("Ouvrir");
+        JMenuItem saveItem = new JMenuItem("Sauvegarder");
+        fileMenu.add(openItem);
+        fileMenu.add(saveItem);
+
+        // Menu Édition
+        JMenu editMenu = new JMenu("Édition");
+
+        // Sous-menu Transformation
+        JMenu transformMenu = new JMenu("Transformation");
+        JMenuItem rotateLeftItem = new JMenuItem("Rotation gauche");
+        JMenuItem rotateRightItem = new JMenuItem("Rotation droite");
+        JMenuItem rotateCustomItem = new JMenuItem("Rotation personnalisée");
+        JMenuItem flipHorizontalItem = new JMenuItem("Retourner horizontalement");
+        JMenuItem flipVerticalItem = new JMenuItem("Retourner verticalement");
+        transformMenu.add(rotateLeftItem);
+        transformMenu.add(rotateRightItem);
+        transformMenu.add(rotateCustomItem);
+        transformMenu.addSeparator();
+        transformMenu.add(flipHorizontalItem);
+        transformMenu.add(flipVerticalItem);
+
+        // Sous-menu Couleur
+        JMenu colorMenu = new JMenu("Couleur");
+        JMenuItem pickColorItem = new JMenuItem("Pipette de couleur");
+        JMenuItem paintBucketItem = new JMenuItem("Seau de peinture");
         colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(30, 30)); // Taille du carré de couleur
+        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
         colorDisplayPanel.setBackground(Color.WHITE); // Couleur initiale (blanc)
+        JMenuItem colorDisplayItem = new JMenuItem("Couleur sélectionnée");
+        colorDisplayItem.setEnabled(false); // Non interactif
+        colorMenu.add(pickColorItem);
+        colorMenu.add(paintBucketItem);
+        colorMenu.addSeparator();
+        colorMenu.add(colorDisplayItem);
+        colorMenu.add(new JSeparator());
 
-        JButton pickColorButton = new JButton("Pipette de couleur");
-        JButton rotateButtonLeft = new JButton("Rotation gauche");
-        JButton rotatebuttonRight = new JButton("Rotation droite");
-        JButton rotateCustomButton = new JButton("Rotation personnalisée");
-        JButton flipHorizontalButton = new JButton("Retourner horizontalement");
-        JButton flipVerticalButton = new JButton("Retourner verticalement");
-        JButton brightenButtonPlus = new JButton("ec +");
-        JButton brightenButtonMoin = new JButton("ec -");
-        JButton darkenButtonPlus = new JButton("as +");
-        JButton darkenButtonMoin = new JButton("as -");
-        JButton drawRectangleButton = new JButton("Rectangle");
-        JButton drawCircleButton = new JButton("Circle");
+        // Sous-menu Luminosité/Contraste
+        JMenu brightnessMenu = new JMenu("Luminosité / Contraste");
+        JMenuItem brightenPlusItem = new JMenuItem("Luminosité +");
+        JMenuItem brightenMinusItem = new JMenuItem("Luminosité -");
+        JMenuItem contrastPlusItem = new JMenuItem("Contraste +");
+        JMenuItem contrastMinusItem = new JMenuItem("Contraste -");
+        brightnessMenu.add(brightenPlusItem);
+        brightnessMenu.add(brightenMinusItem);
+        brightnessMenu.addSeparator();
+        brightnessMenu.add(contrastPlusItem);
+        brightnessMenu.add(contrastMinusItem);
 
-        toolBar.add(openButton);
-        toolBar.add(saveButton);
+        // Sous-menu Dessin
+        JMenu drawMenu = new JMenu("Dessin");
+        JMenuItem drawRectangleItem = new JMenuItem("Rectangle");
+        JMenuItem drawCircleItem = new JMenuItem("Cercle");
+        drawMenu.add(drawRectangleItem);
+        drawMenu.add(drawCircleItem);
 
-        toolBar.addSeparator();
+        // Ajouter les sous-menus au menu Édition
+        editMenu.add(transformMenu);
+        editMenu.add(colorMenu);
+        editMenu.addSeparator();
+        editMenu.add(brightnessMenu);
+        editMenu.add(drawMenu);
 
-        toolBar.add(paintBucketButton);
-        toolBar.add(pickColorButton);
-        toolBar.add(colorDisplayPanel);
+        // Ajouter les menus à la barre de menus
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
 
-        toolBar.add(rotateButtonLeft);
+        // Ajouter la barre de menus à la fenêtre
+        setJMenuBar(menuBar);
 
-        toolBar.addSeparator();
+        // Créer la barre d'outils (JToolBar)
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
-        toolBar.add(rotatebuttonRight);
-        toolBar.add(rotateCustomButton);
-        toolBar.add(flipHorizontalButton);
-        toolBar.add(flipVerticalButton);
+        // Ajouter des boutons à la barre d'outils
+        JButton copierButton = new JButton("Copier");
+        JButton couperButton = new JButton("Couper");
+        JButton collerButton = new JButton("Coller");
+        toolBar.add(copierButton);
+        toolBar.add(couperButton);
+        toolBar.add(collerButton);
 
-        toolBar.addSeparator();
+        // Ajouter la barre de menus et la barre d'outils au topPanel
+        topPanel.add(menuBar);
+        topPanel.add(toolBar);
 
-        toolBar.add(brightenButtonPlus);
-        toolBar.add(new JLabel("Brightness:"));
-        toolBar.add(brightenButtonMoin);
+        // Ajouter le topPanel à la fenêtre
+        add(topPanel, BorderLayout.NORTH);
 
-        toolBar.addSeparator();
+        // Crée la palette de d'outils
+        ToolBar toolbar = new ToolBar();
 
-        toolBar.add(darkenButtonPlus);
-        toolBar.add(new JLabel("Contrast:"));
-        toolBar.add(darkenButtonMoin);
-        toolBar.add(drawRectangleButton);
-        toolBar.add(drawCircleButton);
+        add(toolbar, BorderLayout.WEST);
 
-        add(toolBar, BorderLayout.NORTH);
+        openItem.addActionListener(this::handleOpenImage);
+        saveItem.addActionListener(this::handleSaveImage);
 
-        openButton.addActionListener(this::handleOpenImage);
-        saveButton.addActionListener(this::handleSaveImage);
 
-        paintBucketButton.addActionListener(e -> {
+        paintBucketItem.addActionListener(e -> {
             if (controller != null) {
                 //Change le curseur pour le seau de peinture
                 Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -173,7 +223,7 @@ public class ImageView extends JFrame {
         });
 
         // ActionListener pour la pipette
-        pickColorButton.addActionListener(e -> {
+        pickColorItem.addActionListener(e -> {
             if (controller != null) {
                 //Changer le curseur pour la pipette
                 Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -211,81 +261,268 @@ public class ImageView extends JFrame {
         });
 
 
-        rotateButtonLeft.addActionListener(e -> {
+        rotateLeftItem.addActionListener(e -> {
             if (controller != null) {
                 controller.rotate(false);
             }
         });
 
-        rotatebuttonRight.addActionListener(e -> {
+        rotateRightItem.addActionListener(e -> {
             if (controller != null) {
                 controller.rotate(true);
             }
         });
 
-        rotateCustomButton.addActionListener(e -> {
+        rotateCustomItem.addActionListener(e -> {
             if (controller != null) {
-                String angleStr = JOptionPane.showInputDialog(this, "Enter rotation angle (degrees):", "Rotate Custom",
+                String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):", "Rotate Custom",
                         JOptionPane.PLAIN_MESSAGE);
                 try {
                     int angle = Integer.parseInt(angleStr);
                     controller.rotateImageByAngle(angle);
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Invalid input! Please enter a numeric value.", "Error",
+                    JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.", "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        flipHorizontalButton.addActionListener(e -> {
+        flipHorizontalItem.addActionListener(e -> {
             if (controller != null) {
                 controller.flipImage(true);
             }
         });
 
-        flipVerticalButton.addActionListener(e -> {
+        flipVerticalItem.addActionListener(e -> {
             if (controller != null) {
                 controller.flipImage(false);
             }
         });
 
-        brightenButtonPlus.addActionListener(e -> {
+        brightenPlusItem.addActionListener(e -> {
             if (controller != null) {
                 controller.adjustBrightness(10);
             }
         });
 
-        brightenButtonMoin.addActionListener(e -> {
+        brightenMinusItem.addActionListener(e -> {
             if (controller != null) {
                 controller.adjustBrightness(-10);
             }
         });
 
-        darkenButtonPlus.addActionListener(e -> {
+        contrastPlusItem.addActionListener(e -> {
             if (controller != null) {
                 controller.adjustContrast(10);
             }
         });
 
-        darkenButtonMoin.addActionListener(e -> {
+        contrastMinusItem.addActionListener(e -> {
             if (controller != null) {
                 controller.adjustContrast(-10);
             }
         });
 
-        drawRectangleButton.addActionListener(e -> {
+        drawRectangleItem.addActionListener(e -> {
             if (controller != null) {
                 toggleIsDrawingRectangle();
             }
         });
 
-        drawCircleButton.addActionListener(e -> {
+        drawCircleItem.addActionListener(e -> {
             if (controller != null) {
                 toggleIsDrawingCircle();
             }
         });
 
         addMouseListeners();
+
+        //Raccourcis clavier
+        KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
+        KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
+        KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
+        KeyStroke pickColorKeyStroke = KeyStroke.getKeyStroke("control I");
+        KeyStroke rotateLeftKeyStroke = KeyStroke.getKeyStroke("control LEFT");
+        KeyStroke rotateRightKeyStroke = KeyStroke.getKeyStroke("control RIGHT");
+        KeyStroke rotateCustomKeyStroke = KeyStroke.getKeyStroke("control R");
+        KeyStroke flipHorizontalKeyStroke = KeyStroke.getKeyStroke("control UP");
+        KeyStroke flipVerticalKeyStroke = KeyStroke.getKeyStroke("control DOWN");
+        KeyStroke brightenPlusKeyStroke = KeyStroke.getKeyStroke("control ADD");
+        KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
+        KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
+        KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
+        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control D");
+        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control C");
+
+        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
+        openItem.getActionMap().put("open", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleOpenImage(e);
+            }
+        });
+
+        saveItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(saveKeyStroke, "save");
+        saveItem.getActionMap().put("save", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleSaveImage(e);
+            }
+        });
+
+        paintBucketItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(paintBucketKeyStroke, "paintBucket");
+        paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    if (isPainting || isPickingColor) {
+                        setCursor(Cursor.getDefaultCursor());
+                        isPainting = false;
+                        isPickingColor = false;
+                    } else {
+                        Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                        setCursor(cursor);
+                        isPainting = true;
+                    }
+                }
+            }
+        });
+
+        pickColorItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pickColorKeyStroke, "pickColor");
+        pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    if (isPainting || isPickingColor) {
+                        setCursor(Cursor.getDefaultCursor());
+                        isPainting = false;
+                        isPickingColor = false;
+                    } else {
+                        Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                        setCursor(cursor);
+                        isPickingColor = true;
+                    }
+                }
+            }
+        });
+
+        rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
+        rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.rotate(false);
+                }
+            }
+        });
+
+        rotateRightItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateRightKeyStroke, "rotateRight");
+        rotateRightItem.getActionMap().put("rotateRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.rotate(true);
+                }
+            }
+        });
+
+        rotateCustomItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateCustomKeyStroke, "rotateCustom");
+        rotateCustomItem.getActionMap().put("rotateCustom", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):", "Rotate Custom",
+                            JOptionPane.PLAIN_MESSAGE);
+                    try {
+                        int angle = Integer.parseInt(angleStr);
+                        controller.rotateImageByAngle(angle);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
+        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke, "flipHorizontal");
+        flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.flipImage(true);
+                }
+            }
+        });
+
+        flipVerticalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipVerticalKeyStroke, "flipVertical");
+        flipVerticalItem.getActionMap().put("flipVertical", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.flipImage(false);
+                }
+            }
+        });
+
+        brightenPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenPlusKeyStroke, "brightenPlus");
+        brightenPlusItem.getActionMap().put("brightenPlus", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.adjustBrightness(10);
+                }
+            }
+        });
+
+        brightenMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenMoinKeyStroke, "brightenMoin");
+        brightenMinusItem.getActionMap().put("brightenMoin", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.adjustBrightness(-10);
+                }
+            }
+        });
+
+        contrastPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenPlusKeyStroke, "darkenPlus");
+        contrastPlusItem.getActionMap().put("darkenPlus", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.adjustContrast(10);
+                }
+            }
+        });
+
+        contrastMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenMoinKeyStroke, "darkenMoin");
+        contrastMinusItem.getActionMap().put("darkenMoin", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.adjustContrast(-10);
+                }
+            }
+        });
+
+        drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
+        drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    toggleIsDrawingRectangle();
+                }
+            }
+        });
+
+        drawCircleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawCircleKeyStroke, "drawCircle");
+        drawCircleItem.getActionMap().put("drawCircle", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    toggleIsDrawingCircle();
+                }
+            }
+        });
 
         this.setVisible(true);
 
@@ -450,4 +687,5 @@ public class ImageView extends JFrame {
             }
         });
     }
+
 }
