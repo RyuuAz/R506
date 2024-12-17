@@ -1,6 +1,6 @@
 // ImageModel.java (Modèle pour manipuler l'image)
 
-package ModeleMax;
+package Model;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import ControllerMax.ImageController;
+import Controller.ImageController;
 
 
 public class ImageModel {
@@ -59,33 +59,53 @@ public class ImageModel {
     }
 
     private boolean isWithinTolerance(int color1, int color2, int tolerance) {
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
+        int r1 = (color1 / 256) / 256;
+		int g1 = (color1 / 256) % 256;
+		int b1 = color1 % 256;
 
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
+		int r2 = (color2 / 256) / 256;
+		int g2 = (color2 / 256) % 256;
+		int b2 = color2 % 256;
 
-        return Math.abs(r1 - r2) <= tolerance && Math.abs(g1 - g2) <= tolerance && Math.abs(b1 - b2) <= tolerance;
+		return Math.sqrt(Math.pow(r1-r2, 2) + Math.pow(g1-g2, 2) + Math.pow(b1-b2, 2)) < tolerance;
     }
 
+    // Appliquer une rotation
     public void rotate(boolean clockwise) {
-        if (image == null) return;
-        int width = image.getWidth();
-        int height = image.getHeight();
-        BufferedImage rotatedImage = new BufferedImage(height, width, image.getType());
+        int w = image.getWidth();
+        int h = image.getHeight();
+
+        // Créer une nouvelle image avec des dimensions inversées pour 90° de rotation
+        BufferedImage rotatedImage = new BufferedImage(h, w, image.getType());
         Graphics2D g2d = rotatedImage.createGraphics();
+
+        // Translation et rotation selon le sens de rotation
         if (clockwise) {
-            g2d.rotate(Math.toRadians(90), height / 2.0, height / 2.0);
-            g2d.drawImage(image, 0, -height, null);
+            // Rotation horaire : tourner et déplacer l'image
+            g2d.translate(h, 0);
+            g2d.rotate(Math.toRadians(90));
         } else {
-            g2d.rotate(Math.toRadians(-90), width / 2.0, width / 2.0);
-            g2d.drawImage(image, -width, 0, null);
+            // Rotation antihoraire : tourner et déplacer l'image
+            g2d.translate(0, w);
+            g2d.rotate(Math.toRadians(-90));
         }
+
+        // Dessiner l'image d'origine sur le contexte graphique tourné
+        g2d.drawImage(image, 0, 0, null);
         g2d.dispose();
-        image = rotatedImage;
+
+        // Mettre à jour l'image après rotation
+        this.image = rotatedImage;
     }
+
+    public Color pickColor(int x, int y) {
+        if (image == null || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) {
+            return null; // Coordonnées invalides ou image absente
+        }
+        int rgb = image.getRGB(x, y);
+        return new Color(rgb);
+    }
+
 
     public void rotateByAngle(int angle) {
         if (image == null) return;
@@ -169,31 +189,6 @@ public class ImageModel {
             }
         }
     }
-
-    public Color luminosite(Color coul, int luminosite)
-	{
-		if (luminosite > 255)
-			luminosite = 255;
-		if (luminosite < -255)
-			luminosite = -255;
-
-		if (coul.getRed() + luminosite > 255)
-			luminosite = 255 - coul.getRed();
-		if (coul.getGreen() + luminosite > 255)
-			luminosite = 255 - coul.getGreen();
-		if (coul.getBlue() + luminosite > 255)
-			luminosite = 255 - coul.getBlue();
-
-		if (coul.getRed() + luminosite < 0)
-			luminosite = -coul.getRed();
-		if (coul.getGreen() + luminosite < 0)
-			luminosite = -coul.getGreen();
-		if (coul.getBlue() + luminosite < 0)
-			luminosite = -coul.getBlue();
-
-
-		return new Color(coul.getRed() + luminosite, coul.getGreen() + luminosite, coul.getBlue() + luminosite);
-	}
 
     // Méthode pour limiter la valeur entre 0 et 255
     private int clamp(int value) {

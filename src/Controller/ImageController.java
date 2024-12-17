@@ -1,14 +1,15 @@
-package ControllerMax;
+package Controller;
 
 import java.io.File;
 
 import javax.swing.JOptionPane;
 
 import java.awt.event.*;
-import VueMax.*;
+import Vue.*;
 
 
-import ModeleMax.ImageModel;
+import Model.ImageModel;
+import Vue.ImageView;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -55,27 +56,20 @@ public class ImageController {
     }
 
     public void rotate(boolean clockwise) {
-        if (image == null)
-            return;
-        int width = image.getWidth();
-        int height = image.getHeight();
-        BufferedImage rotatedImage = new BufferedImage(height, width, image.getType());
-        Graphics2D g2d = rotatedImage.createGraphics();
-        if (clockwise) {
-            g2d.rotate(Math.toRadians(90), height / 2.0, height / 2.0);
-            g2d.drawImage(image, 0, -height, null);
-        } else {
-            g2d.rotate(Math.toRadians(-90), width / 2.0, width / 2.0);
-            g2d.drawImage(image, -width, 0, null);
-        }
-        g2d.dispose();
-        image = rotatedImage;
+        model.rotate(clockwise);
+        view.updateImage(model.getImage());
     }
 
     public void rotateImageByAngle(int angle) {
         model.rotateByAngle(angle);
         view.updateImage(model.getImage());
     }
+
+    public void pickColor(int x, int y) {
+        Color color = model.pickColor(x, y);
+        view.displayPickedColor(color);
+    }
+    
 
     public void flipImage(boolean horizontal) {
         model.flip(horizontal);
