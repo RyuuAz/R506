@@ -68,7 +68,7 @@ public class ImageController {
 
     public void pasteImage(ImageView targetView) {
         if (clipboard != null) {
-            targetView.updateImage(clipboard); // Colle l'image dans la vue cible
+            targetView.pasteImage(clipboard);// Colle l'image dans la vue cible
         } else {
             JOptionPane.showMessageDialog(null, "Clipboard is empty!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }

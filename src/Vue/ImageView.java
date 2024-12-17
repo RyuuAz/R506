@@ -42,9 +42,10 @@ public class ImageView extends JFrame {
     private Point lastMousePosition;
     private boolean isDrawingRectangle = false;
     private boolean isDrawingCircle = false;
+    private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image;
+    private BufferedImage image, imageTemp,imagePaste;
 
 
     public ImageView(ImageController controller) {
@@ -301,7 +302,7 @@ public class ImageView extends JFrame {
                 controller.adjustContrast(-10);
             }
         });
-/
+
 
         copierButton.addActionListener(e -> {
             if (controller != null) {
@@ -492,6 +493,17 @@ public class ImageView extends JFrame {
                         shape = null; // une forme
                     }
                     imageLabel.repaint();
+                } else if (selectedShape != null && lastMousePosition != null && isPasting) {
+                    int deltaX = e.getX() - lastMousePosition.x;
+                    int deltaY = e.getY() - lastMousePosition.y;
+                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
+                    for (int x=0; x<imageTemp.getWidth(); x++) {
+                        for (int y=0; y<imageTemp.getHeight(); y++) {
+                            imageTemp.setRGB(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY, imagePaste.getRGB(x, y));
+                        }
+                    }
+                } else if (isPasting) {
+                    image = imageTemp;
                 }
             }
         });
@@ -501,8 +513,20 @@ public class ImageView extends JFrame {
         int y1 = shape.getY();
         int x2 = shape.getX() + shape.getWidth();
         int y2 = shape.getY() + shape.getHeight();
-        BufferedImage image = this.image.getSubimage(x1, y1, x2 - x1, y2 - y1);
+        this.imagePaste = this.image.getSubimage(x1, y1, x2 - x1, y2 - y1);
 
-        controller.copyImage(image);
+        this.controller.copyImage(imagePaste);
     }
+
+    public void pasteImage(BufferedImage image) {
+        this.imageTemp = this.image;
+        this.isPasting = true;
+
+        for (int x=0; x<image.getWidth(); x++) {
+            for (int y=0; y<image.getHeight(); y++) {
+                imageTemp.setRGB(x ,y, image.getRGB(x, y));
+            }
+        }
+        this.shape = new Shape(, image.getWidth(), image.getHeight(), true, Color.RED);
+    }   
 }
