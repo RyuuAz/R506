@@ -34,16 +34,12 @@ public class ImageView extends JFrame {
     public ImageView(ImageController controller) {
         setTitle("Image Editor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 600);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
 
         this.controller = controller;
         this.shape = null;
 
-        this.affichJLabel = new JLabel("Hello World");
-
-        if (this.image != null) {
-        }
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -57,7 +53,7 @@ public class ImageView extends JFrame {
                     currentShape.draw(g2d);
                 } else if ( imageLabel.getIcon() != null) {
                     super.paintComponent(g);
-                    g.drawImage(image, 0, 0, null);
+                    g.drawImage(image, imageLabel.getX(), imageLabel.getY(), null);
                 }
             }
         };
