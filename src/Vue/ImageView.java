@@ -7,7 +7,7 @@ import java.awt.*;
 
 import Controller.ImageController;
 import Model.ImageModel;
-import java.awt.Cursor;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -57,20 +57,24 @@ public class ImageView extends JFrame {
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (image != null) {
+                    int x = (getWidth() - image.getWidth()) / 2;
+                    int y = (getHeight() - image.getHeight()) / 2;
+                    g.drawImage(image, x, y, this);
+                }
                 if (shape != null) {
-                    super.paintComponent(g);
                     Graphics2D g2d = (Graphics2D) g;
                     shape.draw(g2d);
                 } else if (currentShape != null) {
-                    super.paintComponent(g);
                     Graphics2D g2d = (Graphics2D) g;
                     currentShape.draw(g2d);
-                } else if ( imageLabel.getIcon() != null) {
-                    super.paintComponent(g);
-                    g.drawImage(image, 0, 0, null);
                 }
             }
         };
+
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
@@ -154,10 +158,18 @@ public class ImageView extends JFrame {
                 {
                     int x = evt.getX();
                     int y = evt.getY();
-                    if (controller != null) 
-                    {
-                        controller.applyPaintBucket(x, y, pickedColor, 90);
+
+                    // Ajustement des coordonnées
+                    int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
+                    int imageY = y - (imageLabel.getHeight() - image.getHeight()) / 2;
+
+                    // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
+                    if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
+                        if (controller != null) {
+                            controller.applyPaintBucket(imageX, imageY, pickedColor, 90);
+                        }
                     }
+
                     isPainting = false;
                     setCursor(Cursor.getDefaultCursor());
                 }
@@ -184,15 +196,24 @@ public class ImageView extends JFrame {
                 {
                     int x = evt.getX();
                     int y = evt.getY();
-                    if (controller != null) 
-                    {
-                        controller.pickColor(x, y);
+
+                    // Ajustement des coordonnées
+                    int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
+                    int imageY = y - (imageLabel.getHeight() - image.getHeight()) / 2;
+
+                    // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
+                    if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
+                        if (controller != null) {
+                            controller.pickColor(imageX, imageY);
+                        }
                     }
+
                     isPickingColor = false;
                     setCursor(Cursor.getDefaultCursor());
                 }
             }
         });
+
 
         rotateButtonLeft.addActionListener(e -> {
             if (controller != null) {
