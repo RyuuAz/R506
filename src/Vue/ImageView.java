@@ -13,6 +13,7 @@ import Model.ImageModel;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -882,28 +883,51 @@ public class ImageView extends JFrame {
     }
 
     public void copyImage() {
-        if (shape == null) {
-            JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
-        int x1 = Math.max(0, topLeft.x);
-        int y1 = Math.max(0, topLeft.y);
-        int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
-        int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
-
-        int width = x2 - x1;
-        int height = y2 - y1;
-
-        if (width > 0 && height > 0) {
-            this.imagePaste = this.image.getSubimage(x1, y1, width, height);
-            this.controller.copyImage(imagePaste, shape);
-            JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+		if (shape == null) {
+			JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+	
+		Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+		int x1 = Math.max(0, topLeft.x);
+		int y1 = Math.max(0, topLeft.y);
+		int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
+		int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
+	
+		int width = x2 - x1;
+		int height = y2 - y1;
+	
+		if (width > 0 && height > 0) {
+			if (shape.isRectangle()) { 
+				// Cas où la forme est rectangulaire : copie classique
+				this.imagePaste = this.image.getSubimage(x1, y1, width, height);
+			} else { 
+				// Cas où la forme n'est pas rectangulaire : appliquer un masque circulaire
+				BufferedImage subImage = image.getSubimage(x1, y1, width, height);
+	
+				// Créer une nouvelle image avec transparence
+				BufferedImage circularImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2d = circularImage.createGraphics();
+	
+				// Activer l'anticrénelage pour des bords plus doux
+				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	
+				// Appliquer un masque circulaire (Ellipse)
+				g2d.setClip(new Ellipse2D.Float(0, 0, width, height));
+				g2d.drawImage(subImage, 0, 0, null);
+	
+				// Libérer les ressources
+				g2d.dispose();
+	
+				this.imagePaste = circularImage; 
+			}
+	
+			this.controller.copyImage(imagePaste, shape);
+			JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
     public void pasteImage(BufferedImage image) {
 		this.isPasting = true;
