@@ -32,6 +32,7 @@ public class ImageView extends JFrame {
     private Shape shape, shapeTexte;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;
+    private ArrayList<RenderText> renderTexts = new ArrayList<>();
     private Point lastMousePosition;
     private boolean isDrawingRectangle = false;
     private boolean isDrawingCircle = false;
@@ -77,9 +78,17 @@ public class ImageView extends JFrame {
                 if (shape != null) {
                     Graphics2D g2d = (Graphics2D) g;
                     shape.draw(g2d);
-                } else if (currentShape != null) {
+                }  if (currentShape != null) {
                     Graphics2D g2d = (Graphics2D) g;
                     currentShape.draw(g2d);
+                }  if (shapeTexte != null) {
+                    Graphics2D g2d = (Graphics2D) g;
+                    shapeTexte.draw(g2d);
+                } 
+                if (renderTexts.size() > 0) {
+                    for (RenderText renderText : renderTexts) {
+                        renderText.draw((Graphics2D) g);
+                    }
                 }
             }
         };
@@ -385,22 +394,12 @@ public class ImageView extends JFrame {
                         Color color = selectedColor[0] != null ? selectedColor[0] : Color.BLACK;
 
                         Font font = new Font(selectedFont, Font.PLAIN, fontSize);
-                        int x = ((imageLabel.getWidth() - imageTemp.getWidth()) / 2 ) ;
-                        int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2 ) ;
+                        int x = ((imageLabel.getWidth() - imageTemp.getWidth()) / 2 ) +imageTemp.getWidth()/2;
+                        int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2 ) +imageTemp.getHeight()/2; 
                         int width = getTextWidth(text, font);
 
-                        shapeTexte = new Shape(x, y, width, fontSize, true, color);
-                        System.out.println("x : " + x + " y : " + y + " width : " + width + " height : " + fontSize);
-
-                        // Ajouter le texte à l'image avec les valeurs saisies
-                        Graphics2D g2d = imageTemp.createGraphics();
-
-                        g2d.setFont(font);
-                        g2d.setColor(color);
-                        g2d.drawString(text, x, y);
-                        shapeTexte.draw(g2d);
-
-                        g2d.dispose();
+                        shapeTexte = new Shape(x-20, y - fontSize, width+20, fontSize+20, true, color);
+                        renderTexts.add(new RenderText(x, y, text, font, color,width));
 
                         imageLabel.repaint();
 
@@ -718,8 +717,7 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
-                    System.out.println("Shape x : " + shape.getX() + " Shape y : " + shape.getY());
-                    System.out.println("shapeTexte x : " + shapeTexte.getX() + " shapeTexte y : " + shapeTexte.getY());
+                    
                 } else if (isDrawingRectangle || isDrawingCircle) {
                     clickX = e.getX();
                     clickY = e.getY();
@@ -729,7 +727,7 @@ public class ImageView extends JFrame {
                 else if (shapeTexte != null && shapeTexte.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shapeTexte;
                     lastMousePosition = e.getPoint();
-                    System.out.println("Texte");
+                    
                 }
 
             }
@@ -754,6 +752,13 @@ public class ImageView extends JFrame {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
+                    for (RenderText renderText : renderTexts) {
+                        if (renderText.contains(e.getX(), e.getY())) {
+                            System.out.println("Texte");
+                            renderText.moveTo(renderText.getX() + deltaX, renderText.getY() + deltaY);     
+                        }
+                    }
+
                     lastMousePosition = e.getPoint();
                     imageLabel.repaint();
                 } else if ((isDrawingCircle || isDrawingRectangle)) {
