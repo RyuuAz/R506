@@ -14,6 +14,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+
 
 import Controller.ImageController;
 import Model.ImageModel;
@@ -41,7 +44,7 @@ public class ImageView extends JFrame {
     private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image, imageTemp, imagePaste = null;
+    private BufferedImage image, imageTemp, imagePaste,originalImage = null;
 
     public ImageView(ImageController controller) {
         setTitle("Pix.net");
@@ -903,24 +906,37 @@ public class ImageView extends JFrame {
     }
 
     public void pasteImage(BufferedImage image) {
-        this.isPasting = true;
-        this.imagePaste = image;
-        if (imagePaste == null) {
-            JOptionPane.showMessageDialog(this, "Aucune image à coller.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+		this.isPasting = true;
+		this.imagePaste = image;
+		if (imagePaste == null) {
+			JOptionPane.showMessageDialog(this, "Aucune image à coller.", "Erreur", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 
-        if (shape != null) {
-            Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
-            Graphics2D g2d = imageTemp.createGraphics();
-            g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
-            g2d.dispose();
-            updateImage(imageTemp);
-        } else {
-            JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
+		if (shape != null) {
+
+			//centrer l'image collée
+			int x = (imageLabel.getWidth() - imagePaste.getWidth()) / 2;
+			int y = (imageLabel.getHeight() - imagePaste.getHeight()) / 2;
+
+			this.shape.moveTo(x, y);
+
+			Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+			Graphics2D g2d = imageTemp.createGraphics();
+			g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
+			g2d.dispose();
+			updateImage(imageTemp);
+		} else {
+			JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+    public static BufferedImage deepCopy(BufferedImage bi) {
+		ColorModel cm = bi.getColorModel();
+		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		WritableRaster raster = bi.copyData(null);
+		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
 
     private void adjustShapeToResize() {
         if (shape != null) {
