@@ -701,10 +701,13 @@ public class ImageView extends JFrame {
 
     public void updateImage(BufferedImage image) {
         if (this.image == null) {
-            this.image = image;
-        }
-        this.imageTemp = image;
-        imageLabel.repaint();
+			this.image = image;
+			this.originalImage = deepCopy(image);
+			this.imageTemp = deepCopy(image);
+		} else {
+			this.imageTemp = image;
+		}
+		imageLabel.repaint();
     }
 
     public BufferedImage getImage() {
