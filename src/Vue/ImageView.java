@@ -29,7 +29,9 @@ public class ImageView extends JFrame {
     private boolean isPainting;
     private JPanel colorDisplayPanel;
 
-    private Shape shape, shapeTexte;
+    private Shape shape;
+    private ArrayList<Shape> shapeTextes = new ArrayList<>();
+
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;
     private ArrayList<RenderText> renderTexts = new ArrayList<>();
@@ -81,9 +83,11 @@ public class ImageView extends JFrame {
                 }  if (currentShape != null) {
                     Graphics2D g2d = (Graphics2D) g;
                     currentShape.draw(g2d);
-                }  if (shapeTexte != null) {
+                }  if (shapeTextes.size() > 0) {
                     Graphics2D g2d = (Graphics2D) g;
-                    shapeTexte.draw(g2d);
+                    for (Shape shapeTexte : shapeTextes) {
+                        shapeTexte.draw(g2d);
+                    }
                 } 
                 if (renderTexts.size() > 0) {
                     for (RenderText renderText : renderTexts) {
@@ -398,8 +402,10 @@ public class ImageView extends JFrame {
                         int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2 ) +imageTemp.getHeight()/2; 
                         int width = getTextWidth(text, font);
 
-                        shapeTexte = new Shape(x-20, y - fontSize, width+20, fontSize+20, true, color);
-                        renderTexts.add(new RenderText(x, y, text, font, color,width));
+                        RenderText renderText = new RenderText(x, y, text, font, color,width);
+
+                        shapeTextes.add( new Shape(x-20, y - fontSize, width+20, fontSize+20, true, color,renderText));
+                        renderTexts.add(renderText);
 
                         imageLabel.repaint();
 
@@ -724,9 +730,15 @@ public class ImageView extends JFrame {
                     selectedShape = null;
                     lastMousePosition = null;
                 }
-                else if (shapeTexte != null && shapeTexte.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
-                    selectedShape = shapeTexte;
-                    lastMousePosition = e.getPoint();
+                else if (shapeTextes.size() > 0  && !isDrawingRectangle && !isDrawingCircle) {
+
+                    for (Shape shapeTexte : shapeTextes) {
+                        if (shapeTexte.contains(e.getX(), e.getY())) {
+                            selectedShape = shapeTexte;
+                            lastMousePosition = e.getPoint();
+                            break;
+                        }
+                    }
                     
                 }
 
@@ -752,11 +764,8 @@ public class ImageView extends JFrame {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
-                    for (RenderText renderText : renderTexts) {
-                        if (renderText.contains(e.getX(), e.getY())) {
-                            System.out.println("Texte");
-                            renderText.moveTo(renderText.getX() + deltaX, renderText.getY() + deltaY);     
-                        }
+                    if (selectedShape.getRenderText() != null) {
+                        selectedShape.getRenderText().moveTo(selectedShape.getRenderText().getX() + deltaX, selectedShape.getRenderText().getY() + deltaY);
                     }
 
                     lastMousePosition = e.getPoint();
@@ -798,7 +807,7 @@ public class ImageView extends JFrame {
                         currentShape.setY(startY);
                         currentShape.resize(width, height);
                     } else {
-                        currentShape = new Shape(e.getX(), e.getY(), 0, 0, isDrawingRectangle, Color.RED); // Initialise
+                        currentShape = new Shape(e.getX(), e.getY(), 0, 0, isDrawingRectangle, Color.RED,null); // Initialise
                         shape = null; // une forme
                     }
                     imageLabel.repaint();

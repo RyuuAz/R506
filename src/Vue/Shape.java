@@ -9,14 +9,16 @@ public class Shape {
     private int x, y, width, height;
     private boolean isRectangle; // true pour rectangle, false pour cercle
     private Color color;
+    private RenderText renderText = null;
 
-    public Shape(int x, int y, int width, int height, boolean isRectangle, Color color) {
+    public Shape(int x, int y, int width, int height, boolean isRectangle, Color color, RenderText renderText) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.isRectangle = isRectangle;
         this.color = color;
+        this.renderText = renderText;
     }
 
     public void draw(Graphics2D g2d) {
@@ -75,5 +77,21 @@ public class Shape {
 
     public boolean isRectangle() {
         return isRectangle;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public RenderText getRenderText() {
+        return renderText;
+    }
+
+    public void setRenderText(RenderText renderText) {
+        this.renderText = renderText;
     }
 }
