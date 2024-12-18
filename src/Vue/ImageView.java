@@ -6,10 +6,13 @@ import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+
+import Controller.ImageController;
+import Model.ImageModel;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 import Controller.ImageController;
@@ -32,33 +35,44 @@ public class ImageView extends JFrame {
     private Point lastMousePosition;
     private boolean isDrawingRectangle = false;
     private boolean isDrawingCircle = false;
+    private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image;
+    private BufferedImage image, imageTemp, imagePaste = null;
 
     public ImageView(ImageController controller) {
         setTitle("Pix.net");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setSize(800, 600);
         setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         this.controller = controller;
+        this.shape = null;
 
-        // Initialisation de FlatLaf (par défaut Light)
-        try {
-            UIManager.setLookAndFeel(new FlatLightLaf());
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+        this.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                controller.setActiveView(ImageView.this); // Définit cette fenêtre comme active
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                controller.removeView(ImageView.this); // Retire la vue de la liste des vues
+            }
+
+        });
 
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (image != null) {
-                    int x = (getWidth() - image.getWidth()) / 2;
-                    int y = (getHeight() - image.getHeight()) / 2;
-                    g.drawImage(image, x, y, this);
+                if (imageTemp != null) {
+                    int x = (getWidth() - imageTemp.getWidth()) / 2;
+                    int y = (getHeight() - imageTemp.getHeight()) / 2;
+                    g.drawImage(imageTemp, x, y, this);
                 }
                 if (shape != null) {
                     Graphics2D g2d = (Graphics2D) g;
@@ -75,8 +89,8 @@ public class ImageView extends JFrame {
         // Créer un panneau pour afficher l'image
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setHorizontalAlignment(JLabel.LEFT);
+        imageLabel.setVerticalAlignment(JLabel.TOP);
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
@@ -198,10 +212,6 @@ public class ImageView extends JFrame {
         openItem.addActionListener(this::handleOpenImage);
         saveItem.addActionListener(this::handleSaveImage);
 
-        paintBucketItem.addActionListener(e -> {
-            this.togglePaintBucket(e);
-        });
-
         // Event pour le seau de peinture
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -217,7 +227,7 @@ public class ImageView extends JFrame {
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
-                            controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue(), ImageView.this.shape);
+                            //controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue(), ImageView.this.shape);
                         }
                     }
 
@@ -227,12 +237,6 @@ public class ImageView extends JFrame {
             }
         });
 
-        // ActionListener pour la pipette
-        pickColorItem.addActionListener(e -> {
-            this.togglePickColor(e);
-        });
-
-        // Event pour la pipette
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -257,17 +261,6 @@ public class ImageView extends JFrame {
             }
         });
 
-        rotateLeftItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.rotate(false);
-            }
-        });
-
-        rotateRightItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.rotate(true);
-            }
-        });
 
         rotateCustomItem.addActionListener(e -> {
             if (controller != null) {
@@ -318,6 +311,18 @@ public class ImageView extends JFrame {
         contrastMinusItem.addActionListener(e -> {
             if (controller != null) {
                 controller.adjustContrast(-10);
+            }
+        });
+
+        copierButton.addActionListener(e -> {
+            if (controller != null) {
+                copyImage();
+            }
+        });
+
+        collerButton.addActionListener(e -> {
+            if (controller != null) {
+                controller.pasteImage(this);
             }
         });
 
@@ -597,7 +602,7 @@ public class ImageView extends JFrame {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
             FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+                            "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
             fileChooser.setFileFilter(imageFilter);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -688,9 +693,15 @@ public class ImageView extends JFrame {
     }
 
     public void updateImage(BufferedImage image) {
-        this.image = image;
-        imageLabel.setIcon(new ImageIcon(image));
+        if (this.image == null) {
+            this.image = image;
+        }
+        this.imageTemp = image;
         imageLabel.repaint();
+    }
+
+    public BufferedImage getImage() {
+        return image;
     }
 
     public void init() {
@@ -734,7 +745,7 @@ public class ImageView extends JFrame {
         imageLabel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedShape != null && lastMousePosition != null) {
+                if (selectedShape != null && lastMousePosition != null && !isPasting) {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
@@ -781,8 +792,121 @@ public class ImageView extends JFrame {
                         shape = null; // une forme
                     }
                     imageLabel.repaint();
+                } else if (selectedShape != null && lastMousePosition != null && isPasting) {
+                    int deltaX = e.getX() - lastMousePosition.x;
+                    int deltaY = e.getY() - lastMousePosition.y;
+
+                    // Restaurer la zone de l'image précédente
+                    if (imagePaste != null && shape != null) {
+                        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+                        Graphics2D g2dTemp = imageTemp.createGraphics();
+
+                        int x1 = Math.max(0, topLeft.x);
+                        int y1 = Math.max(0, topLeft.y);
+                        int x2 = Math.min(imagePaste.getWidth() + x1, x1 + shape.getWidth());
+                        int y2 = Math.min(imagePaste.getHeight()+ y1, y1 + shape.getHeight());
+                
+                        int width = x2 - x1;
+                        int height = y2 - y1;
+                        BufferedImage imagesub =null;
+                        if (width > 0 && height > 0) {
+                            imagesub = image.getSubimage(x1, y1, width, height);
+                        }
+
+                        // Restaurer les pixels originaux
+                        g2dTemp.drawImage(imagesub,
+                        topLeft.x, 
+                        topLeft.y,
+                        topLeft.x + imagesub.getWidth(),
+                        topLeft.y + imagesub.getHeight(), 
+                        null);
+
+                        g2dTemp.dispose();
+                    }
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
+
+                    // Mettre à jour la position de la forme
+                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
+                    lastMousePosition = e.getPoint();
+
+                    // Dessiner la nouvelle position de l'image
+                    if (imagePaste != null && shape != null) {
+                        Point newTopLeft = convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
+                        Graphics2D g2d = imageTemp.createGraphics();
+                        g2d.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
+                        g2d.dispose();
+                    }
+
+                    // Mise à jour et réaffichage
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
                 }
+
             }
         });
+
     }
+
+    private Point convertToImageCoordinates(int x, int y) {
+        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+        int imageX = x - offsetX;
+        int imageY = y - offsetY;
+        return new Point(imageX, imageY);
+    }
+
+    public void copyImage() {
+        if (shape == null) {
+            JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+        int x1 = Math.max(0, topLeft.x);
+        int y1 = Math.max(0, topLeft.y);
+        int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
+        int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
+
+        int width = x2 - x1;
+        int height = y2 - y1;
+
+        if (width > 0 && height > 0) {
+            this.imagePaste = this.image.getSubimage(x1, y1, width, height);
+            this.controller.copyImage(imagePaste, shape);
+            JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void pasteImage(BufferedImage image) {
+        this.isPasting = true;
+        this.imagePaste = image;
+        if (imagePaste == null) {
+            JOptionPane.showMessageDialog(this, "Aucune image à coller.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (shape != null) {
+            Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+            Graphics2D g2d = imageTemp.createGraphics();
+            g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
+            g2d.dispose();
+            updateImage(imageTemp);
+        } else {
+            JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void adjustShapeToResize() {
+        if (shape != null) {
+            double scaleX = (double) imageTemp.getWidth() / this.getWidth();
+            double scaleY = (double) imageTemp.getHeight() / this.getHeight();
+
+            shape.moveTo((int) (shape.getX() * scaleX), (int) (shape.getY() * scaleY));
+        }
+    }
+
 }

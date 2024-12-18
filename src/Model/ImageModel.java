@@ -39,9 +39,12 @@ public class ImageModel {
         return image;
     }
 
+    public void setImage(BufferedImage image) {
+        this.image = image;
+    }
+
     public void applyPaintBucket(int x, int y, Color newColor, int tolerance, Shape shape) {
-        if (image == null)
-            return;
+        if (image == null) return;
 
         int targetColor = image.getRGB(x, y);
         if (shape == null)
