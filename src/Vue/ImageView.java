@@ -6,10 +6,7 @@ import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 import Controller.ImageController;
@@ -25,6 +22,7 @@ public class ImageView extends JFrame {
     private boolean isPickingColor;
     private boolean isPainting;
     private JPanel colorDisplayPanel;
+    private Menu menu;
 
     private Shape shape;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
@@ -32,15 +30,18 @@ public class ImageView extends JFrame {
     private Point lastMousePosition;
     private boolean isDrawingRectangle = false;
     private boolean isDrawingCircle = false;
+    private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image;
+    private BufferedImage image, imageTemp, imagePaste = null;
 
     public ImageView(ImageController controller) {
+
         setTitle("Pix.net");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         this.controller = controller;
 
@@ -51,14 +52,28 @@ public class ImageView extends JFrame {
             e.printStackTrace();
         }
 
+        this.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                controller.setActiveView(ImageView.this); // Définit cette fenêtre comme active
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                controller.removeView(ImageView.this); // Retire la vue de la liste des vues
+            }
+
+        });
+
+        // Créer une étiquette pour afficher l'image
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (image != null) {
-                    int x = (getWidth() - image.getWidth()) / 2;
-                    int y = (getHeight() - image.getHeight()) / 2;
-                    g.drawImage(image, x, y, this);
+                if (imageTemp != null) {
+                    g.drawImage(imageTemp, 0, 0, imageTemp.getWidth(), imageTemp.getHeight(), this);
                 }
                 if (shape != null) {
                     Graphics2D g2d = (Graphics2D) g;
@@ -70,130 +85,33 @@ public class ImageView extends JFrame {
             }
         };
 
+        imageLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        imageLabel.setBackground(Color.YELLOW);
+       
+        
+
+        // Initialiser les variables
         this.shape = null;
 
-        // Créer un panneau pour afficher l'image
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
 
+        // Centrer l'image dans le JLabel
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setVerticalAlignment(JLabel.CENTER);
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Créer la barre de menus
-        JMenuBar menuBar = new JMenuBar();
-
-        // Menu Fichier
-        JMenu fileMenu = new JMenu("Fichier");
-        JMenuItem openItem = new JMenuItem("Ouvrir");
-        JMenuItem saveItem = new JMenuItem("Sauvegarder");
-        fileMenu.add(openItem);
-        fileMenu.add(saveItem);
-
-        // Menu Édition
-        JMenu editMenu = new JMenu("Édition");
-
-        // Sous-menu Transformation
-        JMenu transformMenu = new JMenu("Transformation");
-        JMenuItem rotateLeftItem = new JMenuItem("Rotation gauche");
-        JMenuItem rotateRightItem = new JMenuItem("Rotation droite");
-        JMenuItem rotateCustomItem = new JMenuItem("Rotation personnalisée");
-        JMenuItem flipHorizontalItem = new JMenuItem("Retourner horizontalement");
-        JMenuItem flipVerticalItem = new JMenuItem("Retourner verticalement");
-        transformMenu.add(rotateLeftItem);
-        transformMenu.add(rotateRightItem);
-        transformMenu.add(rotateCustomItem);
-        transformMenu.addSeparator();
-        transformMenu.add(flipHorizontalItem);
-        transformMenu.add(flipVerticalItem);
-
-        // Sous-menu Couleur
-        JMenu colorMenu = new JMenu("Couleur");
-        JMenuItem pickColorItem = new JMenuItem("Pipette de couleur");
-        JMenuItem paintBucketItem = new JMenuItem("Seau de peinture");
-        colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
-        colorDisplayPanel.setBackground(Color.WHITE); // Couleur initiale (blanc)
-        JMenuItem colorDisplayItem = new JMenuItem("Couleur sélectionnée");
-        colorDisplayItem.setEnabled(false); // Non interactif
-        colorMenu.add(pickColorItem);
-        colorMenu.add(paintBucketItem);
-        colorMenu.addSeparator();
-        colorMenu.add(colorDisplayItem);
-        colorMenu.add(new JSeparator());
-
-        // Sous-menu Luminosité/Contraste
-        JMenu brightnessMenu = new JMenu("Luminosité / Contraste");
-        JMenuItem brightenPlusItem = new JMenuItem("Luminosité +");
-        JMenuItem brightenMinusItem = new JMenuItem("Luminosité -");
-        JMenuItem contrastPlusItem = new JMenuItem("Contraste +");
-        JMenuItem contrastMinusItem = new JMenuItem("Contraste -");
-        brightnessMenu.add(brightenPlusItem);
-        brightnessMenu.add(brightenMinusItem);
-        brightnessMenu.addSeparator();
-        brightnessMenu.add(contrastPlusItem);
-        brightnessMenu.add(contrastMinusItem);
-
-        // Sous-menu Dessin
-        JMenu drawMenu = new JMenu("Dessin");
-        JMenuItem drawRectangleItem = new JMenuItem("Rectangle");
-        JMenuItem drawCircleItem = new JMenuItem("Cercle");
-        drawMenu.add(drawRectangleItem);
-        drawMenu.add(drawCircleItem);
-
-        // Ajouter les sous-menus au menu Édition
-        editMenu.add(transformMenu);
-        editMenu.add(colorMenu);
-        editMenu.addSeparator();
-        editMenu.add(brightnessMenu);
-        editMenu.add(drawMenu);
-
-        // Ajouter les menus à la barre de menus
-        menuBar.add(fileMenu);
-        menuBar.add(editMenu);
-
-        // Ajouter la barre de menus à la fenêtre
-        setJMenuBar(menuBar);
-
-        // Créer la barre d'outils (JToolBar)
-        JToolBar toolBar = new JToolBar();
-        toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
-
-        //Slider de tolerance
-        JSlider toleranceSlider = new JSlider(1, 255, 50);
-        toleranceSlider.setMajorTickSpacing(50);
-        toleranceSlider.setMinorTickSpacing(10);
-        toleranceSlider.setPaintTicks(true);
-        toleranceSlider.setPaintLabels(true);
-        toolBar.add(toleranceSlider);
-
-        // Ajouter des boutons à la barre d'outils
-        JButton copierButton = new JButton("Copier");
-        JButton couperButton = new JButton("Couper");
-        JButton collerButton = new JButton("Coller");
-        toolBar.add(copierButton);
-        toolBar.add(couperButton);
-        toolBar.add(collerButton);
-
-        // Ajouter la barre de menus et la barre d'outils au topPanel
-        topPanel.add(menuBar);
-        topPanel.add(toolBar);
-
+        
         // Ajouter le topPanel à la fenêtre
-        add(topPanel, BorderLayout.NORTH);
+        menu = new Menu(controller, this);
+        add(menu, BorderLayout.NORTH);
+        
 
         // Crée la palette de d'outils
         ToolBar toolbar = new ToolBar();
 
         add(toolbar, BorderLayout.WEST);
-
-        openItem.addActionListener(this::handleOpenImage);
-        saveItem.addActionListener(this::handleSaveImage);
-
-        paintBucketItem.addActionListener(e -> {
-            this.togglePaintBucket(e);
-        });
 
         // Event pour le seau de peinture
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -207,10 +125,19 @@ public class ImageView extends JFrame {
                     int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
                     int imageY = y - (imageLabel.getHeight() - image.getHeight()) / 2;
 
+                    Graphics2D g2d = (Graphics2D) imageTemp.getGraphics();
+                     //fairt un cercle
+                    g2d.drawOval(x, y, 20, 20);
+
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
-                            controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue(), ImageView.this.shape);
+                            //Vérifiez si il y a une forme sélectionnée
+                            if (shape != null) {
+                                controller.applyPaintBucket(imageX, imageY, pickedColor, menu.getSliderValue(), shape);
+                            } else {
+                            controller.applyPaintBucket(imageX, imageY, pickedColor, menu.getSliderValue(), null);
+                            }
                         }
                     }
 
@@ -218,11 +145,6 @@ public class ImageView extends JFrame {
                     setCursor(Cursor.getDefaultCursor());
                 }
             }
-        });
-
-        // ActionListener pour la pipette
-        pickColorItem.addActionListener(e -> {
-            this.togglePickColor(e);
         });
 
         // Event pour la pipette
@@ -250,272 +172,20 @@ public class ImageView extends JFrame {
             }
         });
 
-        rotateLeftItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.rotate(false);
-            }
-        });
-
-        rotateRightItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.rotate(true);
-            }
-        });
-
-        rotateCustomItem.addActionListener(e -> {
-            if (controller != null) {
-                String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):",
-                        "Rotate Custom",
-                        JOptionPane.PLAIN_MESSAGE);
-                try {
-                    int angle = Integer.parseInt(angleStr);
-                    controller.rotateImageByAngle(angle);
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        flipHorizontalItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.flipImage(true);
-            }
-        });
-
-        flipVerticalItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.flipImage(false);
-            }
-        });
-
-        brightenPlusItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.adjustBrightness(10);
-            }
-        });
-
-        brightenMinusItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.adjustBrightness(-10);
-            }
-        });
-
-        contrastPlusItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.adjustContrast(10);
-            }
-        });
-
-        contrastMinusItem.addActionListener(e -> {
-            if (controller != null) {
-                controller.adjustContrast(-10);
-            }
-        });
-
-        drawRectangleItem.addActionListener(e -> {
-            if (controller != null) {
-                toggleIsDrawingRectangle();
-            }
-        });
-
-        drawCircleItem.addActionListener(e -> {
-            if (controller != null) {
-                toggleIsDrawingCircle();
-            }
-        });
-
         addMouseListeners();
-
-        // Raccourcis clavier
-        KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
-        KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
-        KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
-        KeyStroke pickColorKeyStroke = KeyStroke.getKeyStroke("control I");
-        KeyStroke rotateLeftKeyStroke = KeyStroke.getKeyStroke("control LEFT");
-        KeyStroke rotateRightKeyStroke = KeyStroke.getKeyStroke("control RIGHT");
-        KeyStroke rotateCustomKeyStroke = KeyStroke.getKeyStroke("control R");
-        KeyStroke flipHorizontalKeyStroke = KeyStroke.getKeyStroke("control UP");
-        KeyStroke flipVerticalKeyStroke = KeyStroke.getKeyStroke("control DOWN");
-        KeyStroke brightenPlusKeyStroke = KeyStroke.getKeyStroke("control ADD");
-        KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
-        KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
-        KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
-        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control D");
-        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control C");
-
-        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
-        openItem.getActionMap().put("open", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleOpenImage(e);
-            }
-        });
-
-        saveItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(saveKeyStroke, "save");
-        saveItem.getActionMap().put("save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSaveImage(e);
-            }
-        });
-
-        paintBucketItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(paintBucketKeyStroke, "paintBucket");
-        paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageView.this.togglePaintBucket(e);
-            }
-        });
-
-        pickColorItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pickColorKeyStroke, "pickColor");
-        pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageView.this.togglePickColor(e);
-            }
-        });
-
-        rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
-        rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.rotate(false);
-                }
-            }
-        });
-
-        rotateRightItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateRightKeyStroke, "rotateRight");
-        rotateRightItem.getActionMap().put("rotateRight", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.rotate(true);
-                }
-            }
-        });
-
-        rotateCustomItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateCustomKeyStroke, "rotateCustom");
-        rotateCustomItem.getActionMap().put("rotateCustom", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):",
-                            "Rotate Custom",
-                            JOptionPane.PLAIN_MESSAGE);
-                    try {
-                        int angle = Integer.parseInt(angleStr);
-                        controller.rotateImageByAngle(angle);
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke,
-                "flipHorizontal");
-        flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.flipImage(true);
-                }
-            }
-        });
-
-        flipVerticalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipVerticalKeyStroke, "flipVertical");
-        flipVerticalItem.getActionMap().put("flipVertical", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.flipImage(false);
-                }
-            }
-        });
-
-        brightenPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenPlusKeyStroke, "brightenPlus");
-        brightenPlusItem.getActionMap().put("brightenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustBrightness(10);
-                }
-            }
-        });
-
-        brightenMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenMoinKeyStroke, "brightenMoin");
-        brightenMinusItem.getActionMap().put("brightenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustBrightness(-10);
-                }
-            }
-        });
-
-        contrastPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenPlusKeyStroke, "darkenPlus");
-        contrastPlusItem.getActionMap().put("darkenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustContrast(10);
-                }
-            }
-        });
-
-        contrastMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenMoinKeyStroke, "darkenMoin");
-        contrastMinusItem.getActionMap().put("darkenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustContrast(-10);
-                }
-            }
-        });
-
-        drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
-        drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    toggleIsDrawingRectangle();
-                }
-            }
-        });
-
-        drawCircleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawCircleKeyStroke, "drawCircle");
-        drawCircleItem.getActionMap().put("drawCircle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    toggleIsDrawingCircle();
-                }
-            }
-        });
 
         this.setVisible(true);
 
-    }
-
-    private void handleOpenImage(ActionEvent e) {
-        if (controller != null) {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
-            fileChooser.setFileFilter(imageFilter);
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                controller.openImage(fileChooser.getSelectedFile());
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adjustShapeToResize();
+                imageLabel.repaint();
             }
-        }
+        });
     }
 
-    private void togglePickColor(ActionEvent e) {
+    public void togglePickColor(ActionEvent e) {
         if (controller != null) {
             if (isPainting || isPickingColor) {
                 setCursor(Cursor.getDefaultCursor());
@@ -529,7 +199,7 @@ public class ImageView extends JFrame {
         }
     }
 
-    private void togglePaintBucket(ActionEvent e) {
+    public void togglePaintBucket(ActionEvent e) {
         if (controller != null) {
             if (isPainting || isPickingColor) {
                 setCursor(Cursor.getDefaultCursor());
@@ -543,33 +213,26 @@ public class ImageView extends JFrame {
         }
     }
 
-    private void handleSaveImage(ActionEvent e) {
-        if (controller != null) {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                    "Images", "png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp");
-            fileChooser.setFileFilter(imageFilter);
-            fileChooser.setSelectedFile(new java.io.File("image.png")); // Default file name with .png extension
-            int result = fileChooser.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                controller.saveImage(fileChooser.getSelectedFile());
-            }
-        }
+	public void toggleIsDrawingRectangle() {
+        this.isDrawingRectangle = !this.isDrawingRectangle;
+    }
+
+	public void toggleIsDrawingCircle() {
+        this.isDrawingCircle = !this.isDrawingCircle;
+
     }
 
     public void displayPickedColor(Color color) {
-        if (color != null) {
-            pickedColor = color;
-            colorDisplayPanel.setBackground(pickedColor);
-        }
-    }
-
-    public void setController(ImageController controller) {
-        this.controller = controller;
+        this.pickedColor = color;
+        menu.setColorDisplayPanelColor(color);
     }
 
     public JLabel getImageLabel() {
         return imageLabel;
+    }
+
+    public BufferedImage getImageTemp() {
+        return imageTemp; 
     }
 
     public void addShape(Shape shape) {
@@ -581,9 +244,7 @@ public class ImageView extends JFrame {
         return this.isDrawingRectangle;
     }
 
-    public void toggleIsDrawingRectangle() {
-        this.isDrawingRectangle = !this.isDrawingRectangle;
-    }
+    
 
     public boolean getIsDrawingCircle() {
         System.out.println("isDrawingCircle: " + isDrawingCircle);
@@ -591,15 +252,18 @@ public class ImageView extends JFrame {
 
     }
 
-    public void toggleIsDrawingCircle() {
-        this.isDrawingCircle = !this.isDrawingCircle;
-
-    }
-
     public void updateImage(BufferedImage image) {
         this.image = image;
         imageLabel.setIcon(new ImageIcon(image));
+        if (this.image == null) {
+            this.image = image;
+        }
+        this.imageTemp = image;
         imageLabel.repaint();
+    }
+
+    public BufferedImage getImage() {
+        return image;
     }
 
     public void init() {
@@ -619,7 +283,13 @@ public class ImageView extends JFrame {
                     clickY = e.getY();
                     selectedShape = null;
                     lastMousePosition = null;
+                } else if (isDrawingRectangle || isDrawingCircle) {
+                    clickX = e.getX();
+                    clickY = e.getY();
+                    selectedShape = null;
+                    lastMousePosition = null;
                 }
+
 
             }
 
@@ -639,7 +309,7 @@ public class ImageView extends JFrame {
         imageLabel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedShape != null && lastMousePosition != null) {
+                if (selectedShape != null && lastMousePosition != null && !isPasting) {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
@@ -686,8 +356,113 @@ public class ImageView extends JFrame {
                         shape = null; // une forme
                     }
                     imageLabel.repaint();
+                } else if (selectedShape != null && lastMousePosition != null && isPasting) {
+                    int deltaX = e.getX() - lastMousePosition.x;
+                    int deltaY = e.getY() - lastMousePosition.y;
+
+                    // Restaurer la zone de l'image précédente
+                    if (imagePaste != null && shape != null) {
+                        Point topLeft = controller.convertToImageCoordinates(shape.getX(), shape.getY());
+                        Graphics2D g2dTemp = imageTemp.createGraphics();
+
+                        int x1 = Math.max(0, topLeft.x);
+                        int y1 = Math.max(0, topLeft.y);
+                        int x2 = Math.min(imagePaste.getWidth() + x1, x1 + shape.getWidth());
+                        int y2 = Math.min(imagePaste.getHeight()+ y1, y1 + shape.getHeight());
+                
+                        int width = x2 - x1;
+                        int height = y2 - y1;
+                        BufferedImage imagesub =null;
+                        if (width > 0 && height > 0) {
+                            imagesub = image.getSubimage(x1, y1, width, height);
+                        }
+
+                        // Restaurer les pixels originaux
+                        g2dTemp.drawImage(imagesub,
+                        topLeft.x, 
+                        topLeft.y,
+                        topLeft.x + imagesub.getWidth(),
+                        topLeft.y + imagesub.getHeight(), 
+                        null);
+
+                        g2dTemp.dispose();
+                    }
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
+
+                    // Mettre à jour la position de la forme
+                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
+                    lastMousePosition = e.getPoint();
+
+                    // Dessiner la nouvelle position de l'image
+                    if (imagePaste != null && shape != null) {
+                        Point newTopLeft = controller.convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
+                        Graphics2D g2d = imageTemp.createGraphics();
+                        g2d.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
+                        g2d.dispose();
+                    }
+
+                    // Mise à jour et réaffichage
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
                 }
+
             }
         });
+
     }
+
+    public void copyImage() {
+        if (shape == null) {
+            JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Point topLeft = this.controller.convertToImageCoordinates(shape.getX(), shape.getY());
+        int x1 = Math.max(0, topLeft.x);
+        int y1 = Math.max(0, topLeft.y);
+        int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
+        int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
+
+        int width = x2 - x1;
+        int height = y2 - y1;
+
+        if (width > 0 && height > 0) {
+            this.imagePaste = this.image.getSubimage(x1, y1, width, height);
+            this.controller.copyImage(imagePaste, shape);
+            JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void pasteImage(BufferedImage image) {
+        this.isPasting = true;
+        this.imagePaste = image;
+        if (imagePaste == null) {
+            JOptionPane.showMessageDialog(this, "Aucune image à coller.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (shape != null) {
+            Point topLeft = this.controller.convertToImageCoordinates(shape.getX(), shape.getY());
+            Graphics2D g2d = imageTemp.createGraphics();
+            g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
+            g2d.dispose();
+            updateImage(imageTemp);
+        } else {
+            JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void adjustShapeToResize() {
+        if (shape != null) {
+            double scaleX = (double) imageTemp.getWidth() / this.getWidth();
+            double scaleY = (double) imageTemp.getHeight() / this.getHeight();
+
+            shape.moveTo((int) (shape.getX() * scaleX), (int) (shape.getY() * scaleY));
+        }
+    }
+
 }
