@@ -7,11 +7,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Stack;
+import java.lang.reflect.Array;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import Controller.ImageController;
-
+import Vue.Shape;
 
 public class ImageModel {
     private BufferedImage image;
@@ -35,70 +40,98 @@ public class ImageModel {
         return image;
     }
 
-    public void applyPaintBucket(int x, int y, Color newColor, int tolerance) {
-        if (image == null || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) {
+    public void applyPaintBucket(int x, int y, Color newColor, int tolerance, Shape shape) {
+        if (image == null)
             return;
-        }
 
         int targetColor = image.getRGB(x, y);
-        int newColorRGB = newColor.getRGB();
-        
-        // Vérification : si la couleur cible est la même que la nouvelle, inutile de continuer
-        if (targetColor == newColorRGB) {
-            return;
-        }
-
-        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        floodFillIterative(x, y, targetColor, newColorRGB, tolerance, visited);
+        if (shape == null)
+            floodFill(x, y, targetColor, newColor.getRGB(), tolerance);
+        else
+            floodFillShape(x, y, targetColor, newColor.getRGB(), tolerance, shape);
     }
 
-    private void floodFillIterative(int x, int y, int targetColor, int newColor, int tolerance, boolean[][] visited) {
-        int width = image.getWidth();
-        int height = image.getHeight();
+    public void floodFill(int x, int y, int targetColor, int newColor, int tolerance) {
+        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(new Point(x, y));
 
-        Stack<Point> stack = new Stack<>();
-        stack.push(new Point(x, y));
+        while (!queue.isEmpty()) {
+            Point p = queue.poll();
+            int px = p.x;
+            int py = p.y;
 
-        while (!stack.isEmpty()) {
-            Point p = stack.pop();
-            int cx = p.x;
-            int cy = p.y;
+            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+                continue;
+            if (visited[px][py])
+                continue;
 
-            if (cx < 0 || cy < 0 || cx >= width || cy >= height) {
+            int currentColor = image.getRGB(px, py);
+            if (!isWithinTolerance(targetColor, currentColor, tolerance))
+                continue;
+
+            image.setRGB(px, py, newColor);
+            visited[px][py] = true;
+
+            queue.add(new Point(px + 1, py));
+            queue.add(new Point(px - 1, py));
+            queue.add(new Point(px, py + 1));
+            queue.add(new Point(px, py - 1));
+        }
+    }
+
+    public void floodFillShape(int x, int y, int targetColor, int newColor, int tolerance, Shape shape) {
+        if (targetColor == newColor) return;  // Pas besoin de remplir si la couleur cible est identique
+    
+        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(new Point(x, y));
+    
+        while (!queue.isEmpty()) {
+            Point p = queue.poll();
+            int px = p.x;
+            int py = p.y;
+    
+            // Vérifier que le point est dans les limites de l'image
+            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+                continue;
+            if (visited[px][py])
+                continue;
+    
+            int currentColor = image.getRGB(px, py);
+            if (!isWithinTolerance(targetColor, currentColor, tolerance))
+                continue;
+    
+            // Vérifier si les coordonnée du point est à l'intérieur de la forme
+            if (!shape.contains(px, py))
+            {
                 continue;
             }
-            if (visited[cx][cy]) {
-                continue;
-            }
 
-            visited[cx][cy] = true;
-
-            int currentColor = image.getRGB(cx, cy);
-            if (!isWithinTolerance(targetColor, currentColor, tolerance)) {
-                continue;
-            }
-
-            image.setRGB(cx, cy, newColor);
-
-            // Ajout des voisins dans la pile
-            stack.push(new Point(cx + 1, cy));
-            stack.push(new Point(cx - 1, cy));
-            stack.push(new Point(cx, cy + 1));
-            stack.push(new Point(cx, cy - 1));
+            System.out.println("px: " + px + " py: " + py);
+            System.out.println("x: " + shape.getX() + " y: " + shape.getY());
+            // Remplir le pixel avec la nouvelle couleur
+            image.setRGB(px, py, newColor);
+            visited[px][py] = true;
+    
+            // Ajouter les voisins à la queue
+            queue.add(new Point(px + 1, py));
+            queue.add(new Point(px - 1, py));
+            queue.add(new Point(px, py + 1));
+            queue.add(new Point(px, py - 1));
         }
     }
 
     private boolean isWithinTolerance(int color1, int color2, int tolerance) {
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
+        int r1 = (color1 / 256) / 256;
+        int g1 = (color1 / 256) % 256;
+        int b1 = color1 % 256;
 
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
+        int r2 = (color2 / 256) / 256;
+        int g2 = (color2 / 256) % 256;
+        int b2 = color2 % 256;
 
-        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
-        return distance <= tolerance;
+        return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)) < tolerance;
     }
 
     // Appliquer une rotation
@@ -137,33 +170,33 @@ public class ImageModel {
         return new Color(rgb);
     }
 
-
     public void rotateByAngle(int angle) {
-        if (image == null) return;
-    
+        if (image == null)
+            return;
+
         int width = image.getWidth();
         int height = image.getHeight();
-    
+
         // Calcul d'une nouvelle taille pour éviter la coupe
         double radians = Math.toRadians(angle);
         int newWidth = (int) Math.round(Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians)));
         int newHeight = (int) Math.round(Math.abs(height * Math.cos(radians)) + Math.abs(width * Math.sin(radians)));
-    
+
         BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, image.getType());
         Graphics2D g2d = rotatedImage.createGraphics();
-    
+
         // Translation et rotation
         g2d.translate((newWidth - width) / 2.0, (newHeight - height) / 2.0);
         g2d.rotate(radians, width / 2.0, height / 2.0);
         g2d.drawImage(image, 0, 0, null);
-    
+
         g2d.dispose();
         image = rotatedImage;
     }
-    
 
     public void flip(boolean horizontal) {
-        if (image == null) return;
+        if (image == null)
+            return;
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage flippedImage = new BufferedImage(width, height, image.getType());
@@ -225,10 +258,10 @@ public class ImageModel {
     private int clamp(int value) {
         return Math.min(Math.max(value, 0), 255);
     }
-    
 
     public void addText(String text, Font font, Color color, int x, int y) {
-        if (image == null) return;
+        if (image == null)
+            return;
         Graphics2D g2d = image.createGraphics();
         g2d.setFont(font);
         g2d.setColor(color);

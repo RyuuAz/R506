@@ -4,17 +4,13 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import java.awt.event.*;
-import Vue.*;
-
-
 import Model.ImageModel;
 import Vue.ImageView;
+import Vue.Shape;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.awt.Point;
 
 public class ImageController {
@@ -50,8 +46,8 @@ public class ImageController {
         }
     }
 
-    public void applyPaintBucket(int x, int y, Color color, int tolerance) {
-        model.applyPaintBucket(x, y, color, tolerance);
+    public void applyPaintBucket(int x, int y, Color color, int tolerance, Shape shape) {
+        model.applyPaintBucket(x, y, color, tolerance,shape);
         view.updateImage(model.getImage());
     }
 
@@ -69,7 +65,6 @@ public class ImageController {
         Color color = model.pickColor(x, y);
         view.displayPickedColor(color);
     }
-    
 
     public void flipImage(boolean horizontal) {
         model.flip(horizontal);
@@ -91,10 +86,7 @@ public class ImageController {
         view.updateImage(model.getImage());
     }
 
-    
-    
-
     public static void main(String[] args) {
-       new ImageController();
+        new ImageController();
     }
 }
