@@ -26,7 +26,7 @@ public class ImageView extends JFrame {
     private boolean isPainting;
     private JPanel colorDisplayPanel;
 
-    private Shape shape;
+    private Shape shape, shapeTexte;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;
     private Point lastMousePosition;
@@ -142,12 +142,19 @@ public class ImageView extends JFrame {
         drawMenu.add(drawRectangleItem);
         drawMenu.add(drawCircleItem);
 
+        // Sous-menu Texte
+        JMenu textMenu = new JMenu("Texte");
+        JMenuItem addTextItem = new JMenuItem("Ajouter du texte");
+        textMenu.add(addTextItem);
+
         // Ajouter les sous-menus au menu Édition
         editMenu.add(transformMenu);
         editMenu.add(colorMenu);
         editMenu.addSeparator();
         editMenu.add(brightnessMenu);
         editMenu.add(drawMenu);
+        editMenu.addSeparator();
+        editMenu.add(textMenu);
 
         // Ajouter les menus à la barre de menus
         menuBar.add(fileMenu);
@@ -323,6 +330,79 @@ public class ImageView extends JFrame {
         drawCircleItem.addActionListener(e -> {
             if (controller != null) {
                 toggleIsDrawingCircle();
+            }
+        });
+
+        addTextItem.addActionListener(e -> {
+            if (controller != null) {
+                // Créer un JPanel personnalisé avec plusieurs composants
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                
+                // Champ de texte pour saisir le texte à ajouter
+                JTextField textField = new JTextField(20);
+                panel.add(new JLabel("Entrez le texte de votre choix :"));
+                panel.add(textField);
+                
+                // Sélecteur de police (JComboBox)
+                String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+                JComboBox<String> fontComboBox = new JComboBox<>(fonts);
+                panel.add(new JLabel("Choisissez la police :"));
+                panel.add(fontComboBox);
+                
+                // Sélecteur de taille de police (JSpinner)
+                SpinnerModel sizeModel = new SpinnerNumberModel(20, 1, 100, 1); // Min 1, Max 100, Incr 1
+                JSpinner fontSizeSpinner = new JSpinner(sizeModel);
+                panel.add(new JLabel("Choisissez la taille de la police :"));
+                panel.add(fontSizeSpinner);
+                
+                // Sélecteur de couleur (JColorChooser)
+                JButton colorButton = new JButton("Choisir la couleur");
+                panel.add(new JLabel("Choisissez la couleur :"));
+                panel.add(colorButton);
+                
+                // Ouvrir le JColorChooser quand on clique sur le bouton
+                Color[] selectedColor = new Color[1];
+                colorButton.addActionListener(ae -> {
+                    selectedColor[0] = JColorChooser.showDialog(ImageView.this, "Sélectionner une couleur", Color.BLACK);
+                });
+                
+                // Afficher la boîte de dialogue avec les champs
+                int option = JOptionPane.showConfirmDialog(ImageView.this, panel, "Ajouter du texte à l'image",
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                
+                if (option == JOptionPane.OK_OPTION) {
+                    try {
+                        // Récupérer les valeurs des champs
+                        String text = textField.getText();
+                        String selectedFont = (String) fontComboBox.getSelectedItem();
+                        int fontSize = (Integer) fontSizeSpinner.getValue();
+                        Color color = selectedColor[0] != null ? selectedColor[0] : Color.BLACK;
+
+                        Font font = new Font(selectedFont, Font.PLAIN, fontSize);
+                        int x = (image.getWidth() - getTextWidth(text, font)) / 2;
+                        int y = (image.getHeight() + fontSize) / 2;
+                        int width = getTextWidth(text, font);
+
+                        shapeTexte = new Shape(x, y, width, fontSize, true, color);
+                        System.out.println(x + " " + y + " " + width + " " + fontSize);
+
+                        // Ajouter le texte à l'image avec les valeurs saisies
+                        Graphics2D g2d = imageTemp.createGraphics();
+                        g2d.setFont(font);
+                        g2d.setColor(color);
+                        g2d.drawString(text, x, y);
+
+                        g2d.dispose();
+
+                        imageLabel.repaint();
+
+
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(ImageView.this, "Erreur d'entrée ! Veuillez entrer des valeurs valides.",
+                                "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
@@ -502,6 +582,17 @@ public class ImageView extends JFrame {
 
     }
 
+    private int getTextWidth(String text, Font font) {
+        if (text == null || font == null) {
+            return 0; // Éviter les NullPointerException
+        }
+        BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = tempImage.createGraphics();
+        FontMetrics metrics = g2d.getFontMetrics(font);
+        g2d.dispose();
+        return metrics.stringWidth(text);
+    }
+
     private void handleOpenImage(ActionEvent e) {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
@@ -619,6 +710,10 @@ public class ImageView extends JFrame {
                     clickY = e.getY();
                     selectedShape = null;
                     lastMousePosition = null;
+                }
+                else if (shapeTexte != null && shapeTexte.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
+                    selectedShape = shapeTexte;
+                    lastMousePosition = e.getPoint();
                 }
 
             }
