@@ -8,23 +8,9 @@ import java.awt.*;
 import Controller.ImageController;
 import Model.ImageModel;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 
 public class ImageView extends JFrame {
     private JLabel imageLabel;
@@ -35,7 +21,7 @@ public class ImageView extends JFrame {
     private boolean isPickingColor;
     private boolean isPainting;
     private JPanel colorDisplayPanel;
-    
+
     private Shape shape;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;
@@ -45,16 +31,14 @@ public class ImageView extends JFrame {
     private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image, imageTemp,imagePaste;
-
+    private BufferedImage image, imageTemp, imagePaste = null;
 
     public ImageView(ImageController controller) {
         setTitle("Image Editor");
-        
+
         setSize(800, 600);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
 
         this.controller = controller;
         this.shape = null;
@@ -63,7 +47,6 @@ public class ImageView extends JFrame {
             @Override
             public void windowGainedFocus(WindowEvent e) {
                 controller.setActiveView(ImageView.this); // Définit cette fenêtre comme active
-                System.out.println("Window gained focus");
             }
         });
 
@@ -72,18 +55,17 @@ public class ImageView extends JFrame {
             public void windowClosed(WindowEvent e) {
                 controller.removeView(ImageView.this); // Retire la vue de la liste des vues
             }
+
         });
-        
-        
 
         imageLabel = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (image != null) {
-                    int x = (getWidth() - image.getWidth()) / 2;
-                    int y = (getHeight() - image.getHeight()) / 2;
-                    g.drawImage(image, x, y, this);
+                if (imageTemp != null) {
+                    int x = (getWidth() - imageTemp.getWidth()) / 2;
+                    int y = (getHeight() - imageTemp.getHeight()) / 2;
+                    g.drawImage(imageTemp, x, y, this);
                 }
                 if (shape != null) {
                     Graphics2D g2d = (Graphics2D) g;
@@ -95,8 +77,8 @@ public class ImageView extends JFrame {
             }
         };
 
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setHorizontalAlignment(JLabel.LEFT);
+        imageLabel.setVerticalAlignment(JLabel.TOP);
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
@@ -167,7 +149,7 @@ public class ImageView extends JFrame {
 
         paintBucketButton.addActionListener(e -> {
             if (controller != null) {
-                //Change le curseur pour le seau de peinture
+                // Change le curseur pour le seau de peinture
                 Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
                 setCursor(cursor);
                 isPainting = true;
@@ -175,13 +157,10 @@ public class ImageView extends JFrame {
         });
 
         // Event pour le seau de peinture
-        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() 
-        {
+        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) 
-            {
-                if (isPainting) 
-                {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (isPainting) {
                     int x = evt.getX();
                     int y = evt.getY();
 
@@ -205,7 +184,7 @@ public class ImageView extends JFrame {
         // ActionListener pour la pipette
         pickColorButton.addActionListener(e -> {
             if (controller != null) {
-                //Changer le curseur pour la pipette
+                // Changer le curseur pour la pipette
                 Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
                 setCursor(cursor);
                 isPickingColor = true;
@@ -213,13 +192,10 @@ public class ImageView extends JFrame {
         });
 
         // Event pour la pipette
-        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() 
-        {
+        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) 
-            {
-                if (isPickingColor) 
-                {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (isPickingColor) {
                     int x = evt.getX();
                     int y = evt.getY();
 
@@ -239,7 +215,6 @@ public class ImageView extends JFrame {
                 }
             }
         });
-
 
         rotateButtonLeft.addActionListener(e -> {
             if (controller != null) {
@@ -303,7 +278,6 @@ public class ImageView extends JFrame {
             }
         });
 
-
         copierButton.addActionListener(e -> {
             if (controller != null) {
                 copyImage();
@@ -332,13 +306,20 @@ public class ImageView extends JFrame {
 
         this.setVisible(true);
 
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adjustShapeToResize();
+                imageLabel.repaint();
+            }
+        });
     }
 
     private void handleOpenImage(ActionEvent e) {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
             FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
             fileChooser.setFileFilter(imageFilter);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -363,7 +344,6 @@ public class ImageView extends JFrame {
             colorDisplayPanel.setBackground(pickedColor);
         }
     }
-    
 
     public void setController(ImageController controller) {
         this.controller = controller;
@@ -398,8 +378,10 @@ public class ImageView extends JFrame {
     }
 
     public void updateImage(BufferedImage image) {
-       this.image = image;
-        imageLabel.setIcon(new ImageIcon(image));
+        if (this.image == null) {
+            this.image = image;
+        }
+        this.imageTemp = image;
         imageLabel.repaint();
     }
 
@@ -419,13 +401,13 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
-                } else  if (isDrawingRectangle || isDrawingCircle) {
-                   clickX = e.getX();
-                     clickY = e.getY();
-                     selectedShape = null;
-                    lastMousePosition = null; 
+                } else if (isDrawingRectangle || isDrawingCircle) {
+                    clickX = e.getX();
+                    clickY = e.getY();
+                    selectedShape = null;
+                    lastMousePosition = null;
                 }
-                
+
             }
 
             @Override
@@ -444,7 +426,7 @@ public class ImageView extends JFrame {
         imageLabel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedShape != null && lastMousePosition != null) {
+                if (selectedShape != null && lastMousePosition != null && !isPasting) {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
@@ -458,7 +440,7 @@ public class ImageView extends JFrame {
                         int endX = e.getX();
                         int endY = e.getY();
 
-                        if(e.getX() < clickX) {
+                        if (e.getX() < clickX) {
                             startX = e.getX();
                             endX = clickX;
                         } else {
@@ -466,7 +448,7 @@ public class ImageView extends JFrame {
                             startX = clickX;
                         }
 
-                        if(e.getY() < clickY) {
+                        if (e.getY() < clickY) {
                             startY = e.getY();
                             endY = clickY;
                         } else {
@@ -477,13 +459,11 @@ public class ImageView extends JFrame {
                         int width = Math.abs(endX - startX);
                         int height = Math.abs(endY - startY);
 
-
                         if (!currentShape.isRectangle()) {
                             int diameter = Math.max(width, height);
                             width = diameter;
                             height = diameter;
                         }
-                    
 
                         currentShape.setX(startX);
                         currentShape.setY(startY);
@@ -496,37 +476,118 @@ public class ImageView extends JFrame {
                 } else if (selectedShape != null && lastMousePosition != null && isPasting) {
                     int deltaX = e.getX() - lastMousePosition.x;
                     int deltaY = e.getY() - lastMousePosition.y;
-                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
-                    for (int x=0; x<imageTemp.getWidth(); x++) {
-                        for (int y=0; y<imageTemp.getHeight(); y++) {
-                            imageTemp.setRGB(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY, imagePaste.getRGB(x, y));
+
+                    // Restaurer la zone de l'image précédente
+                    if (imagePaste != null && shape != null) {
+                        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+                        Graphics2D g2dTemp = imageTemp.createGraphics();
+
+                        int x1 = Math.max(0, topLeft.x);
+                        int y1 = Math.max(0, topLeft.y);
+                        int x2 = Math.min(imagePaste.getWidth() + x1, x1 + shape.getWidth());
+                        int y2 = Math.min(imagePaste.getHeight()+ y1, y1 + shape.getHeight());
+                
+                        int width = x2 - x1;
+                        int height = y2 - y1;
+                        BufferedImage imagesub =null;
+                        if (width > 0 && height > 0) {
+                            imagesub = image.getSubimage(x1, y1, width, height);
                         }
+
+                        // Restaurer les pixels originaux
+                        g2dTemp.drawImage(imagesub,
+                        topLeft.x, 
+                        topLeft.y,
+                        topLeft.x + imagesub.getWidth(),
+                        topLeft.y + imagesub.getHeight(), 
+                        null);
+
+                        g2dTemp.dispose();
                     }
-                } else if (isPasting) {
-                    image = imageTemp;
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
+
+                    // Mettre à jour la position de la forme
+                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
+                    lastMousePosition = e.getPoint();
+
+                    // Dessiner la nouvelle position de l'image
+                    if (imagePaste != null && shape != null) {
+                        Point newTopLeft = convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
+                        Graphics2D g2d = imageTemp.createGraphics();
+                        g2d.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
+                        g2d.dispose();
+                    }
+
+                    // Mise à jour et réaffichage
+                    updateImage(imageTemp);
+                    imageLabel.repaint();
                 }
+
             }
         });
-    }
-    public void copyImage() {
-        int x1 = shape.getX();
-        int y1 = shape.getY();
-        int x2 = shape.getX() + shape.getWidth();
-        int y2 = shape.getY() + shape.getHeight();
-        this.imagePaste = this.image.getSubimage(x1, y1, x2 - x1, y2 - y1);
 
-        this.controller.copyImage(imagePaste);
+    }
+
+    private Point convertToImageCoordinates(int x, int y) {
+        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+        int imageX = x - offsetX;
+        int imageY = y - offsetY;
+        return new Point(imageX, imageY);
+    }
+
+    public void copyImage() {
+        if (shape == null) {
+            JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+        int x1 = Math.max(0, topLeft.x);
+        int y1 = Math.max(0, topLeft.y);
+        int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
+        int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
+
+        int width = x2 - x1;
+        int height = y2 - y1;
+
+        if (width > 0 && height > 0) {
+            this.imagePaste = this.image.getSubimage(x1, y1, width, height);
+            this.controller.copyImage(imagePaste, shape);
+            JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void pasteImage(BufferedImage image) {
-        this.imageTemp = this.image;
         this.isPasting = true;
-
-        for (int x=0; x<image.getWidth(); x++) {
-            for (int y=0; y<image.getHeight(); y++) {
-                imageTemp.setRGB(x ,y, image.getRGB(x, y));
-            }
+        this.imagePaste = image;
+        if (imagePaste == null) {
+            JOptionPane.showMessageDialog(this, "Aucune image à coller.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        this.shape = new Shape(, image.getWidth(), image.getHeight(), true, Color.RED);
-    }   
+
+        if (shape != null) {
+            Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+            Graphics2D g2d = imageTemp.createGraphics();
+            g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
+            g2d.dispose();
+            updateImage(imageTemp);
+        } else {
+            JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void adjustShapeToResize() {
+        if (shape != null) {
+            double scaleX = (double) imageTemp.getWidth() / this.getWidth();
+            double scaleY = (double) imageTemp.getHeight() / this.getHeight();
+
+            shape.moveTo((int) (shape.getX() * scaleX), (int) (shape.getY() * scaleY));
+        }
+    }
+
 }

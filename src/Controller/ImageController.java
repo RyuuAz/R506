@@ -25,6 +25,7 @@ public class ImageController {
     private ImageView activeView; // Vue active
  // Liste des fenêtres ouvertes
     private BufferedImage clipboard; // Pour gérer le copier/coller
+    private Shape shape;
   
 
     public ImageController() {
@@ -62,16 +63,22 @@ public class ImageController {
         }
     }
 
-    public void copyImage(BufferedImage image) {
+    public void copyImage(BufferedImage image,Shape shape) {
         clipboard = image; // Sauvegarde l'image dans le presse-papiers
+        this.shape=shape;
     }
 
     public void pasteImage(ImageView targetView) {
         if (clipboard != null) {
+            targetView.addShape(this.shape);
             targetView.pasteImage(clipboard);// Colle l'image dans la vue cible
         } else {
             JOptionPane.showMessageDialog(null, "Clipboard is empty!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    public Shape getShape() {
+        return shape;
     }
 
     public List<ImageView> getViews() {
