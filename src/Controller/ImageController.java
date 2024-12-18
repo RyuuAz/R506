@@ -1,26 +1,22 @@
 package Controller;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
 import Model.ImageModel;
 import Vue.ImageView;
 import Vue.Shape;
-
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.image.BufferedImage;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class ImageController {
     private ImageModel model;
     private List<ImageView> views;
     private ImageView activeView; // Vue active
- // Liste des fenêtres ouvertes
+    // Liste des fenêtres ouvertes
     private BufferedImage clipboard; // Pour gérer le copier/coller
     private Shape shape;
 
@@ -43,8 +39,7 @@ public class ImageController {
         try {
             if (activeView.getImage() == null) {
                 activeView.updateImage(model.loadImageFromFile(file)); // Ferme la fenêtre active
-            }
-            else {
+            } else {
                 openNewView(model.loadImageFromFile(file));
             } // Crée une nouvelle fenêtre avec l'image
         } catch (Exception e) {
@@ -63,9 +58,9 @@ public class ImageController {
         }
     }
 
-    public void copyImage(BufferedImage image,Shape shape) {
+    public void copyImage(BufferedImage image, Shape shape) {
         clipboard = image; // Sauvegarde l'image dans le presse-papiers
-        this.shape=shape;
+        this.shape = shape;
     }
 
     public void pasteImage(ImageView targetView) {
@@ -95,13 +90,13 @@ public class ImageController {
             System.exit(0);// Ouvre une nouvelle fenêtre si toutes les fenêtres sont fermées
         }
     }
-    
 
     public Point convertToImageCoordinates(int x, int y) {
         return model.convertToImageCoordinates(x, y, activeView.getImageLabel(), activeView.getImageTemp());
     }
 
-    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color color, int tolerance, Shape shape, JLabel imageLabel) {
+    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color color, int tolerance, Shape shape,
+            JLabel imageLabel) {
         return model.applyPaintBucket(image, x, y, color, tolerance, shape, imageLabel);
     }
 

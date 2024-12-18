@@ -6,7 +6,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
 import com.formdev.flatlaf.FlatDarkLaf;
 
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -19,23 +18,21 @@ import java.awt.event.*;
 
 import Controller.ImageController;
 
-
-
 public class Menu extends JPanel {
 
     private JPanel colorDisplayPanel;
     private ImageController controller;
-	private ImageView view;
-	private JSlider toleranceSlider;
+    private ImageView view;
+    private JSlider toleranceSlider;
 
-	// Constructeur pour initialiser le menu
-	public Menu (ImageController controller, ImageView view) {
+    // Constructeur pour initialiser le menu
+    public Menu(ImageController controller, ImageView view) {
 
-		this.controller = controller;
-		this.view = view;
-		
-		// Créer un panneau pour afficher l'image
-		this.setLayout(new FlowLayout(FlowLayout.LEFT));
+        this.controller = controller;
+        this.view = view;
+
+        // Créer un panneau pour afficher l'image
+        this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // Créer la barre de menus
         JMenuBar menuBar = new JMenuBar();
@@ -119,7 +116,7 @@ public class Menu extends JPanel {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
-        //Slider de tolerance
+        // Slider de tolerance
         toleranceSlider = new JSlider(1, 255, 50);
         toleranceSlider.setMajorTickSpacing(50);
         toleranceSlider.setMinorTickSpacing(10);
@@ -127,26 +124,26 @@ public class Menu extends JPanel {
         toleranceSlider.setPaintLabels(true);
         toolBar.add(toleranceSlider);
 
-		//Ajout d'une case couelur pour afficher la couleur selectionnée
-		colorDisplayPanel = new JPanel();
-		colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
-		colorDisplayPanel.setBackground(Color.WHITE);
-		toolBar.add(colorDisplayPanel);
+        // Ajout d'une case couelur pour afficher la couleur selectionnée
+        colorDisplayPanel = new JPanel();
+        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
+        colorDisplayPanel.setBackground(Color.WHITE);
+        toolBar.add(colorDisplayPanel);
 
         // Ajouter des boutons à la barre d'outils
         JButton copierButton = new JButton("Copier");
         JButton couperButton = new JButton("Couper");
         JButton collerButton = new JButton("Coller");
 
-		//Ajout d'un btn dark mode
-		JButton darkModeButton = new JButton("Dark Mode");
-		darkModeButton.addActionListener(e -> {
-			try {
-				UIManager.setLookAndFeel(new FlatDarkLaf());
-			} catch (UnsupportedLookAndFeelException ex) {
-				ex.printStackTrace();
-			}
-		});
+        // Ajout d'un btn dark mode
+        JButton darkModeButton = new JButton("Dark Mode");
+        darkModeButton.addActionListener(e -> {
+            try {
+                UIManager.setLookAndFeel(new FlatDarkLaf());
+            } catch (UnsupportedLookAndFeelException ex) {
+                ex.printStackTrace();
+            }
+        });
 
         toolBar.add(copierButton);
         toolBar.add(couperButton);
@@ -156,27 +153,27 @@ public class Menu extends JPanel {
         this.add(menuBar);
         this.add(toolBar);
 
-		openItem.addActionListener(this::handleOpenImage);
+        openItem.addActionListener(this::handleOpenImage);
         saveItem.addActionListener(this::handleSaveImage);
 
         paintBucketItem.addActionListener(e -> {
             view.togglePaintBucket(e);
         });
 
-		 // ActionListener pour la pipette
-		 pickColorItem.addActionListener(e -> {
+        // ActionListener pour la pipette
+        pickColorItem.addActionListener(e -> {
             view.togglePickColor(e);
         });
 
-		rotateLeftItem.addActionListener(e -> {
+        rotateLeftItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(),false));
+                view.updateImage(controller.rotate(view.getImageTemp(), false));
             }
         });
 
         rotateRightItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(),true));
+                view.updateImage(controller.rotate(view.getImageTemp(), true));
             }
         });
 
@@ -187,8 +184,8 @@ public class Menu extends JPanel {
                         JOptionPane.PLAIN_MESSAGE);
                 try {
                     int angle = Integer.parseInt(angleStr);
-					view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
-				} catch (NumberFormatException ex) {
+                    view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
+                } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
                             "Error",
                             JOptionPane.ERROR_MESSAGE);
@@ -198,13 +195,13 @@ public class Menu extends JPanel {
 
         flipHorizontalItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.flipImage(view.getImageTemp(),true));
+                view.updateImage(controller.flipImage(view.getImageTemp(), true));
             }
         });
 
         flipVerticalItem.addActionListener(e -> {
             if (controller != null) {
-              view.updateImage(controller.flipImage(view.getImageTemp(),false));
+                view.updateImage(controller.flipImage(view.getImageTemp(), false));
             }
         });
 
@@ -216,13 +213,13 @@ public class Menu extends JPanel {
 
         brightenMinusItem.addActionListener(e -> {
             if (controller != null) {
-               view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10));
+                view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10));
             }
         });
 
         contrastPlusItem.addActionListener(e -> {
             if (controller != null) {
-               view.updateImage(controller.adjustContrast(view.getImageTemp(), 10));
+                view.updateImage(controller.adjustContrast(view.getImageTemp(), 10));
             }
         });
 
@@ -256,7 +253,7 @@ public class Menu extends JPanel {
             }
         });
 
-		 // Raccourcis clavier
+        // Raccourcis clavier
         KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
         KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
         KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
@@ -310,7 +307,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-					view.updateImage(controller.rotate(view.getImageTemp(),false));
+                    view.updateImage(controller.rotate(view.getImageTemp(), false));
                 }
             }
         });
@@ -320,7 +317,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.rotate(view.getImageTemp(),true));
+                    view.updateImage(controller.rotate(view.getImageTemp(), true));
                 }
             }
         });
@@ -335,7 +332,7 @@ public class Menu extends JPanel {
                             JOptionPane.PLAIN_MESSAGE);
                     try {
                         int angle = Integer.parseInt(angleStr);
-						view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
+                        view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
                                 "Error",
@@ -351,7 +348,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp() ,true));
+                    view.updateImage(controller.flipImage(view.getImageTemp(), true));
                 }
             }
         });
@@ -361,7 +358,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp(),false));
+                    view.updateImage(controller.flipImage(view.getImageTemp(), false));
                 }
             }
         });
@@ -425,23 +422,20 @@ public class Menu extends JPanel {
                 }
             }
         });
-	}
+    }
 
-	private void handleOpenImage(ActionEvent e) {
-		if (controller != null) {
-			JFileChooser fileChooser = new JFileChooser();
-			FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-					"Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
-			fileChooser.setFileFilter(imageFilter);
-			int result = fileChooser.showOpenDialog(this);
-			if (result == JFileChooser.APPROVE_OPTION) {
-				controller.openImage(fileChooser.getSelectedFile());
-				int imageWidth = view.getImageTemp().getWidth();
-        		int imageHeight = view.getImageTemp().getHeight();
-				view.setImageTaille(imageWidth, imageHeight);
-			}
-		}
-	}
+    private void handleOpenImage(ActionEvent e) {
+        if (controller != null) {
+            JFileChooser fileChooser = new JFileChooser();
+            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+            fileChooser.setFileFilter(imageFilter);
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                controller.openImage(fileChooser.getSelectedFile());
+            }
+        }
+    }
 
     private void handleSaveImage(ActionEvent e) {
         if (controller != null) {
@@ -457,15 +451,15 @@ public class Menu extends JPanel {
         }
     }
 
-	public int getSliderValue() {
-		return toleranceSlider.getValue();
-	}
+    public int getSliderValue() {
+        return toleranceSlider.getValue();
+    }
 
-	public JPanel getColorDisplayPanel() {
-		return colorDisplayPanel;
-	}
+    public JPanel getColorDisplayPanel() {
+        return colorDisplayPanel;
+    }
 
-	public void setColorDisplayPanelColor(Color color) {
-		colorDisplayPanel.setBackground(color);
-	}
+    public void setColorDisplayPanelColor(Color color) {
+        colorDisplayPanel.setBackground(color);
+    }
 }

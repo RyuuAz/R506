@@ -1,19 +1,19 @@
 package Vue;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
-public class ToolBar extends JToolBar {
-    private JPanel colorDisplayPanel;
-
+public class ToolPalette extends JToolBar {
     // Constructeur pour initialiser la barre d'outils flottante
-    public ToolBar() {
+    public ToolPalette() {
         // Définir la barre d'outils comme flottante
         setFloatable(true);
         setRollover(true); // Pour un effet visuel au survol
 
         // Utiliser un GridLayout pour organiser les boutons en deux colonnes
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5)); // 0 lignes signifie un nombre de lignes dynamique, 2 colonnes, 5 pixels d'espace entre les composants
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5)); // 0 lignes signifie un nombre de lignes dynamique,
+                                                                     // 2 colonnes, 5 pixels d'espace entre les
+                                                                     // composants
 
         // Ajouter des boutons à la barre d'outils
         JButton paintBucketButton = createToolButton("Seau de peinture", "paintbucket.png");
@@ -33,12 +33,6 @@ public class ToolBar extends JToolBar {
         // Ajouter un séparateur entre les groupes d'outils
         addSeparator();
 
-        // Panneau pour afficher la couleur sélectionnée
-        colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
-        colorDisplayPanel.setBackground(Color.WHITE); // Couleur initiale (blanc)
-        add(colorDisplayPanel);
-
         // Définir la taille préférée de la barre d'outils
         setPreferredSize(new Dimension(200, 100)); // Ajustez les dimensions selon vos besoins
     }
@@ -53,10 +47,5 @@ public class ToolBar extends JToolBar {
         button.setVerticalTextPosition(SwingConstants.BOTTOM);
         button.setPreferredSize(null); // Laisser le bouton prendre la taille nécessaire
         return button;
-    }
-
-    // Méthode pour obtenir le panneau de couleur (si besoin)
-    public JPanel getColorDisplayPanel() {
-        return colorDisplayPanel;
     }
 }

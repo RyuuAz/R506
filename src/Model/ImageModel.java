@@ -2,19 +2,16 @@
 
 package Model;
 
+import Controller.ImageController;
+import Vue.Shape;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
-
-
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
-
-import Controller.ImageController;
-import Vue.Shape;
 
 public class ImageModel {
     private ImageController controller;
@@ -39,31 +36,32 @@ public class ImageModel {
     }
 
     public Point convertToImageCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
-        double scaleX = (double) imageTemp.getWidth() / imageLabel.getWidth();
-        double scaleY = (double) imageTemp.getHeight() / imageLabel.getHeight();
-    
-        return new Point((int) (x * scaleX), (int) (y * scaleY));
+        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+        int imageX = x - offsetX;
+        int imageY = y - offsetY;
+        return new Point(imageX, imageY);
     }
 
     public Point convertToLabelCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
-        double scaleX = (double) imageTemp.getWidth() / imageLabel.getWidth();
-        double scaleY = (double) imageTemp.getHeight() / imageLabel.getHeight();
-    
-        return new Point((int) (x / scaleX), (int) (y / scaleY));
+        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+        int labelX = x + offsetX;
+        int labelY = y + offsetY;
+        return new Point(labelX, labelY);
     }
 
+    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color newColor, int tolerance, Shape shape,
+            JLabel imageLabel) {
+        if (image == null)
+            return null;
 
-    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color newColor, int tolerance, Shape shape, JLabel imageLabel) {
-        if (image == null){
-        System.out.println("image is null");
-            return null; }
-            System.out.println("ici");
         int targetColor = image.getRGB(x, y);
-        if (shape == null){System.out.println("shape is null");
+
+        if (shape == null)
             return floodFill(image, x, y, targetColor, newColor.getRGB(), tolerance);
-    }  
-        else {System.out.println("shape is not null");
-            return floodFillShape(image, x, y, targetColor, newColor.getRGB(), tolerance, shape, imageLabel);}
+        else
+            return floodFillShape(image, x, y, targetColor, newColor.getRGB(), tolerance, shape, imageLabel);
     }
 
     public BufferedImage floodFill(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance) {
@@ -97,14 +95,14 @@ public class ImageModel {
         return image;
     }
 
-    public BufferedImage floodFillShape(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance, Shape shape, JLabel imageLabel) {
-        if (targetColor == newColor) return null;  // Pas besoin de remplir si la couleur cible est identique
-    
+    public BufferedImage floodFillShape(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance,
+            Shape shape, JLabel imageLabel) {
+        if (targetColor == newColor)
+            return null; // Pas besoin de remplir si la couleur cible est identique
+
         boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
         Queue<Point> queue = new LinkedList<>();
         queue.add(new Point(x, y));
-
-        System.out.println("x: " + x + " y: " + y);
 
         while (!queue.isEmpty()) {
             Point p = queue.poll();
@@ -119,10 +117,6 @@ public class ImageModel {
             int currentColor = image.getRGB(px, py);
             if (!isWithinTolerance(targetColor, currentColor, tolerance))
                 continue;
-
-            System.out.println("px: " + px + " py: " + py);
-            System.out.println("shape.contains(px, py): " + shape.contains(px, py));
-            System.out.println("shape.x: " + shape.getX() + " shape.y: " + shape.getY());
 
             Point tmpPoint = convertToLabelCoordinates(px, py, imageLabel, image);
 
@@ -165,40 +159,37 @@ public class ImageModel {
         }
     }
 
-    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees)
-	{
-		int width = source.getWidth();
-		int height = source.getHeight();
-		
-		int i0 = width / 2;
-		int j0 = height / 2;
+    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees) {
+        int width = source.getWidth();
+        int height = source.getHeight();
 
-		double angleRadians = Math.toRadians(angleDegrees);
-		double cosAngle = Math.cos(angleRadians);
-		double sinAngle = Math.sin(angleRadians);
+        int i0 = width / 2;
+        int j0 = height / 2;
 
-		BufferedImage destination = new BufferedImage(width, height, source.getType());
+        double angleRadians = Math.toRadians(angleDegrees);
+        double cosAngle = Math.cos(angleRadians);
+        double sinAngle = Math.sin(angleRadians);
 
-		for (int iPrime = 0; iPrime < width; iPrime++)
-		{
-			for (int jPrime = 0; jPrime < height; jPrime++)
-			{
-				int xPrime = iPrime - i0;
-				int yPrime = jPrime - j0;
+        BufferedImage destination = new BufferedImage(width, height, source.getType());
 
-				int x = (int) Math.round(xPrime * cosAngle - yPrime * sinAngle);
-				int y = (int) Math.round(xPrime * sinAngle + yPrime * cosAngle);
+        for (int iPrime = 0; iPrime < width; iPrime++) {
+            for (int jPrime = 0; jPrime < height; jPrime++) {
+                int xPrime = iPrime - i0;
+                int yPrime = jPrime - j0;
 
-				int i = x + i0;
-				int j = y + j0;
+                int x = (int) Math.round(xPrime * cosAngle - yPrime * sinAngle);
+                int y = (int) Math.round(xPrime * sinAngle + yPrime * cosAngle);
 
-				if (i >= 0 && i < width && j >= 0 && j < height)
-					destination.setRGB(iPrime, jPrime, source.getRGB(i, j));
-			}
-		}
-		
-		return destination;
-	}
+                int i = x + i0;
+                int j = y + j0;
+
+                if (i >= 0 && i < width && j >= 0 && j < height)
+                    destination.setRGB(iPrime, jPrime, source.getRGB(i, j));
+            }
+        }
+
+        return destination;
+    }
 
     public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
         int width = image.getWidth();
