@@ -6,12 +6,16 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import Controller.ImageController;
+import Vue.Shape;
 
 public class ImageModel {
     private BufferedImage image;
@@ -35,13 +39,15 @@ public class ImageModel {
         return image;
     }
 
-    public void applyPaintBucket(int x, int y, Color newColor, int tolerance) {
+    public void applyPaintBucket(int x, int y, Color newColor, int tolerance, Shape shape) {
         if (image == null)
             return;
 
         int targetColor = image.getRGB(x, y);
-        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        floodFill(x, y, targetColor, newColor.getRGB(), tolerance);
+        if (shape == null)
+            floodFill(x, y, targetColor, newColor.getRGB(), tolerance);
+        else
+            floodFillShape(x, y, targetColor, newColor.getRGB(), tolerance, shape);
     }
 
     public void floodFill(int x, int y, int targetColor, int newColor, int tolerance) {
@@ -66,6 +72,48 @@ public class ImageModel {
             image.setRGB(px, py, newColor);
             visited[px][py] = true;
 
+            queue.add(new Point(px + 1, py));
+            queue.add(new Point(px - 1, py));
+            queue.add(new Point(px, py + 1));
+            queue.add(new Point(px, py - 1));
+        }
+    }
+
+    public void floodFillShape(int x, int y, int targetColor, int newColor, int tolerance, Shape shape) {
+        if (targetColor == newColor) return;  // Pas besoin de remplir si la couleur cible est identique
+    
+        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(new Point(x, y));
+    
+        while (!queue.isEmpty()) {
+            Point p = queue.poll();
+            int px = p.x;
+            int py = p.y;
+    
+            // Vérifier que le point est dans les limites de l'image
+            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+                continue;
+            if (visited[px][py])
+                continue;
+    
+            int currentColor = image.getRGB(px, py);
+            if (!isWithinTolerance(targetColor, currentColor, tolerance))
+                continue;
+    
+            // Vérifier si les coordonnée du point est à l'intérieur de la forme
+            if (!shape.contains(px, py))
+            {
+                continue;
+            }
+
+            System.out.println("px: " + px + " py: " + py);
+            System.out.println("x: " + shape.getX() + " y: " + shape.getY());
+            // Remplir le pixel avec la nouvelle couleur
+            image.setRGB(px, py, newColor);
+            visited[px][py] = true;
+    
+            // Ajouter les voisins à la queue
             queue.add(new Point(px + 1, py));
             queue.add(new Point(px - 1, py));
             queue.add(new Point(px, py + 1));

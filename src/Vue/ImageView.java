@@ -161,7 +161,7 @@ public class ImageView extends JFrame {
         toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
         //Slider de tolerance
-        JSlider toleranceSlider = new JSlider(0, 255, 0);
+        JSlider toleranceSlider = new JSlider(1, 255, 50);
         toleranceSlider.setMajorTickSpacing(50);
         toleranceSlider.setMinorTickSpacing(10);
         toleranceSlider.setPaintTicks(true);
@@ -210,7 +210,7 @@ public class ImageView extends JFrame {
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
-                            controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue());
+                            controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue(), ImageView.this.shape);
                         }
                     }
 
@@ -690,5 +690,4 @@ public class ImageView extends JFrame {
             }
         });
     }
-
 }

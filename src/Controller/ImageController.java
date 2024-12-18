@@ -6,6 +6,7 @@ import javax.swing.JOptionPane;
 
 import Model.ImageModel;
 import Vue.ImageView;
+import Vue.Shape;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -45,8 +46,8 @@ public class ImageController {
         }
     }
 
-    public void applyPaintBucket(int x, int y, Color color, int tolerance) {
-        model.applyPaintBucket(x, y, color, tolerance);
+    public void applyPaintBucket(int x, int y, Color color, int tolerance, Shape shape) {
+        model.applyPaintBucket(x, y, color, tolerance,shape);
         view.updateImage(model.getImage());
     }
 
