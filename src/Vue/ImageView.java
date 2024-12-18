@@ -819,55 +819,68 @@ public class ImageView extends JFrame {
                     }
                     imageLabel.repaint();
                 } else if (selectedShape != null && lastMousePosition != null && isPasting) {
-                    int deltaX = e.getX() - lastMousePosition.x;
-                    int deltaY = e.getY() - lastMousePosition.y;
+					int deltaX = e.getX() - lastMousePosition.x;
+					int deltaY = e.getY() - lastMousePosition.y;
 
-                    // Restaurer la zone de l'image précédente
-                    if (imagePaste != null && shape != null) {
-                        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
-                        Graphics2D g2dTemp = imageTemp.createGraphics();
+					// Calculer la nouvelle position proposée
+					int newX = selectedShape.getX() + deltaX;
+					int newY = selectedShape.getY() + deltaY;
 
-                        int x1 = Math.max(0, topLeft.x);
-                        int y1 = Math.max(0, topLeft.y);
-                        int x2 = Math.min(imagePaste.getWidth() + x1, x1 + shape.getWidth());
-                        int y2 = Math.min(imagePaste.getHeight()+ y1, y1 + shape.getHeight());
-                
-                        int width = x2 - x1;
-                        int height = y2 - y1;
-                        BufferedImage imagesub =null;
-                        if (width > 0 && height > 0) {
-                            imagesub = image.getSubimage(x1, y1, width, height);
-                        }
+					// Contraindre les nouvelles coordonnées pour rester dans les limites de l'image
+					// principale
+					int maxWidth = imageTemp.getWidth() + (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+					int maxHeight = imageTemp.getHeight() + (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
 
-                        // Restaurer les pixels originaux
-                        g2dTemp.drawImage(imagesub,
-                        topLeft.x, 
-                        topLeft.y,
-                        topLeft.x + imagesub.getWidth(),
-                        topLeft.y + imagesub.getHeight(), 
-                        null);
+					if (imagePaste != null) {
+						int pasteWidth = imagePaste.getWidth();
+						int pasteHeight = imagePaste.getHeight();
 
-                        g2dTemp.dispose();
-                    }
-                    updateImage(imageTemp);
-                    imageLabel.repaint();
+						// Contraindre X
+						if (newX < (imageLabel.getWidth() - imageTemp.getWidth()) / 2)
+							newX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+						if (newX + pasteWidth > maxWidth)
+							newX = maxWidth - pasteWidth;
 
-                    // Mettre à jour la position de la forme
-                    selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
-                    lastMousePosition = e.getPoint();
+						// Contraindre Y
+						if (newY < (imageLabel.getHeight() - imageTemp.getHeight()) / 2)
+							newY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+						if (newY + pasteHeight > maxHeight)
+							newY = maxHeight - pasteHeight;
+					}
 
-                    // Dessiner la nouvelle position de l'image
-                    if (imagePaste != null && shape != null) {
-                        Point newTopLeft = convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
-                        Graphics2D g2d = imageTemp.createGraphics();
-                        g2d.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
-                        g2d.dispose();
-                    }
+					// Restaurer les pixels de l'image originale avant le déplacement
+					if (shape != null) {
+						Point topLeft = convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
 
-                    // Mise à jour et réaffichage
-                    updateImage(imageTemp);
-                    imageLabel.repaint();
-                }
+						int x1 = Math.max(0, topLeft.x);
+						int y1 = Math.max(0, topLeft.y);
+						int width = Math.min(imagePaste.getWidth(), shape.getWidth());
+						int height = Math.min(imagePaste.getHeight(), shape.getHeight());
+
+						BufferedImage originalSubImage = originalImage.getSubimage(x1, y1, width, height);
+
+						Graphics2D g2dRestore = imageTemp.createGraphics();
+						g2dRestore.drawImage(originalSubImage, x1, y1, null);
+						g2dRestore.dispose();
+					}
+
+					// Mettre à jour la position de la forme avec les coordonnées contraintes
+					selectedShape.moveTo(newX, newY);
+					lastMousePosition = e.getPoint();
+
+					// Dessiner l'image collée à la nouvelle position
+					if (imagePaste != null) {
+						Point newTopLeft = convertToImageCoordinates(newX, newY);
+
+						Graphics2D g2dDraw = imageTemp.createGraphics();
+						g2dDraw.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
+						g2dDraw.dispose();
+					}
+
+					// Mise à jour de l'affichage
+					updateImage(imageTemp);
+					imageLabel.repaint();
+				}
 
             }
         });
