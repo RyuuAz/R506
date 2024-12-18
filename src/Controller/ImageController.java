@@ -140,6 +140,10 @@ public class ImageController {
         activeView.updateImage(model.getImage());
     }
 
+    public void setModelImage(BufferedImage image) {
+        model.setImage(image);
+    }
+
     
     
 
