@@ -90,7 +90,9 @@ public class ImageView extends JFrame {
                 }  if (shapeTextes.size() > 0) {
                     Graphics2D g2d = (Graphics2D) g;
                     for (Shape shapeTexte : shapeTextes) {
-                        shapeTexte.draw(g2d);
+                        if (shapeTexte.isOver()) {
+                            shapeTexte.draw(g2d);
+                        }
                     }
                 } 
                 if (renderTexts.size() > 0) {
@@ -882,6 +884,23 @@ public class ImageView extends JFrame {
 					imageLabel.repaint();
 				}
 
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+
+                for (Shape shapeTexte : shapeTextes) {
+                    if (shapeTexte.contains(x, y)) {
+                        setCursor(new Cursor(Cursor.HAND_CURSOR));
+                        shapeTexte.setOver(true);
+                    } else {
+                        shapeTexte.setOver(false);
+                        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                    }
+                }
+                imageLabel.repaint();
             }
         });
 
