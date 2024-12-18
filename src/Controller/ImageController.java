@@ -96,7 +96,7 @@ public class ImageController {
 
 
     public void applyPaintBucket(int x, int y, Color color, int tolerance) {
-        model.applyPaintBucket(x, y, color, tolerance);
+        model.applyPaintBucket(x, y,color,tolerance ,shape);
         activeView.updateImage(model.getImage());
     }
 

@@ -385,18 +385,20 @@ public class ImageView extends JFrame {
                         Color color = selectedColor[0] != null ? selectedColor[0] : Color.BLACK;
 
                         Font font = new Font(selectedFont, Font.PLAIN, fontSize);
-                        int x = (image.getWidth() - getTextWidth(text, font)) / 2;
-                        int y = (image.getHeight() + fontSize) / 2;
+                        int x = ((imageLabel.getWidth() - imageTemp.getWidth()) / 2 ) ;
+                        int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2 ) ;
                         int width = getTextWidth(text, font);
 
                         shapeTexte = new Shape(x, y, width, fontSize, true, color);
-                        System.out.println(x + " " + y + " " + width + " " + fontSize);
+                        System.out.println("x : " + x + " y : " + y + " width : " + width + " height : " + fontSize);
 
                         // Ajouter le texte à l'image avec les valeurs saisies
                         Graphics2D g2d = imageTemp.createGraphics();
+
                         g2d.setFont(font);
                         g2d.setColor(color);
                         g2d.drawString(text, x, y);
+                        shapeTexte.draw(g2d);
 
                         g2d.dispose();
 
@@ -716,6 +718,8 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
+                    System.out.println("Shape x : " + shape.getX() + " Shape y : " + shape.getY());
+                    System.out.println("shapeTexte x : " + shapeTexte.getX() + " shapeTexte y : " + shapeTexte.getY());
                 } else if (isDrawingRectangle || isDrawingCircle) {
                     clickX = e.getX();
                     clickY = e.getY();
@@ -725,6 +729,7 @@ public class ImageView extends JFrame {
                 else if (shapeTexte != null && shapeTexte.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shapeTexte;
                     lastMousePosition = e.getPoint();
+                    System.out.println("Texte");
                 }
 
             }
