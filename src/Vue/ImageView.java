@@ -25,7 +25,7 @@ public class ImageView extends JFrame {
     private boolean isPickingColor;
     private boolean isPainting;
     private JPanel colorDisplayPanel;
-    
+
     private Shape shape;
     private Shape currentShape = null; // Forme temporaire en cours de dessin
     private Shape selectedShape = null;
@@ -35,7 +35,6 @@ public class ImageView extends JFrame {
     private int clickX, clickY;
 
     private BufferedImage image;
-
 
     public ImageView(ImageController controller) {
         setTitle("Pix.net");
@@ -161,6 +160,14 @@ public class ImageView extends JFrame {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
+        //Slider de tolerance
+        JSlider toleranceSlider = new JSlider(0, 255, 0);
+        toleranceSlider.setMajorTickSpacing(50);
+        toleranceSlider.setMinorTickSpacing(10);
+        toleranceSlider.setPaintTicks(true);
+        toleranceSlider.setPaintLabels(true);
+        toolBar.add(toleranceSlider);
+
         // Ajouter des boutons à la barre d'outils
         JButton copierButton = new JButton("Copier");
         JButton couperButton = new JButton("Couper");
@@ -184,24 +191,15 @@ public class ImageView extends JFrame {
         openItem.addActionListener(this::handleOpenImage);
         saveItem.addActionListener(this::handleSaveImage);
 
-
         paintBucketItem.addActionListener(e -> {
-            if (controller != null) {
-                //Change le curseur pour le seau de peinture
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
-                isPainting = true;
-            }
+            this.togglePaintBucket(e);
         });
 
         // Event pour le seau de peinture
-        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() 
-        {
+        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) 
-            {
-                if (isPainting) 
-                {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (isPainting) {
                     int x = evt.getX();
                     int y = evt.getY();
 
@@ -212,7 +210,7 @@ public class ImageView extends JFrame {
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
-                            controller.applyPaintBucket(imageX, imageY, pickedColor, 90);
+                            controller.applyPaintBucket(imageX, imageY, pickedColor, toleranceSlider.getValue());
                         }
                     }
 
@@ -224,22 +222,14 @@ public class ImageView extends JFrame {
 
         // ActionListener pour la pipette
         pickColorItem.addActionListener(e -> {
-            if (controller != null) {
-                //Changer le curseur pour la pipette
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
-                isPickingColor = true;
-            }
+            this.togglePickColor(e);
         });
 
         // Event pour la pipette
-        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() 
-        {
+        imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) 
-            {
-                if (isPickingColor) 
-                {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (isPickingColor) {
                     int x = evt.getX();
                     int y = evt.getY();
 
@@ -260,7 +250,6 @@ public class ImageView extends JFrame {
             }
         });
 
-
         rotateLeftItem.addActionListener(e -> {
             if (controller != null) {
                 controller.rotate(false);
@@ -275,13 +264,15 @@ public class ImageView extends JFrame {
 
         rotateCustomItem.addActionListener(e -> {
             if (controller != null) {
-                String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):", "Rotate Custom",
+                String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):",
+                        "Rotate Custom",
                         JOptionPane.PLAIN_MESSAGE);
                 try {
                     int angle = Integer.parseInt(angleStr);
                     controller.rotateImageByAngle(angle);
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.", "Error",
+                    JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.",
+                            "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -337,7 +328,7 @@ public class ImageView extends JFrame {
 
         addMouseListeners();
 
-        //Raccourcis clavier
+        // Raccourcis clavier
         KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
         KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
         KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
@@ -374,17 +365,7 @@ public class ImageView extends JFrame {
         paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    if (isPainting || isPickingColor) {
-                        setCursor(Cursor.getDefaultCursor());
-                        isPainting = false;
-                        isPickingColor = false;
-                    } else {
-                        Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                        setCursor(cursor);
-                        isPainting = true;
-                    }
-                }
+                ImageView.this.togglePaintBucket(e);
             }
         });
 
@@ -392,17 +373,7 @@ public class ImageView extends JFrame {
         pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    if (isPainting || isPickingColor) {
-                        setCursor(Cursor.getDefaultCursor());
-                        isPainting = false;
-                        isPickingColor = false;
-                    } else {
-                        Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                        setCursor(cursor);
-                        isPickingColor = true;
-                    }
-                }
+                ImageView.this.togglePickColor(e);
             }
         });
 
@@ -431,20 +402,23 @@ public class ImageView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):", "Rotate Custom",
+                    String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):",
+                            "Rotate Custom",
                             JOptionPane.PLAIN_MESSAGE);
                     try {
                         int angle = Integer.parseInt(angleStr);
                         controller.rotateImageByAngle(angle);
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.", "Error",
+                        JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.",
+                                "Error",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         });
 
-        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke, "flipHorizontal");
+        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke,
+                "flipHorizontal");
         flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -532,7 +506,7 @@ public class ImageView extends JFrame {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
             FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
             fileChooser.setFileFilter(imageFilter);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -541,9 +515,41 @@ public class ImageView extends JFrame {
         }
     }
 
+    private void togglePickColor(ActionEvent e) {
+        if (controller != null) {
+            if (isPainting || isPickingColor) {
+                setCursor(Cursor.getDefaultCursor());
+                isPainting = false;
+                isPickingColor = false;
+            } else {
+                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(cursor);
+                isPickingColor = true;
+            }
+        }
+    }
+
+    private void togglePaintBucket(ActionEvent e) {
+        if (controller != null) {
+            if (isPainting || isPickingColor) {
+                setCursor(Cursor.getDefaultCursor());
+                isPainting = false;
+                isPickingColor = false;
+            } else {
+                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(cursor);
+                isPainting = true;
+            }
+        }
+    }
+
     private void handleSaveImage(ActionEvent e) {
         if (controller != null) {
             JFileChooser fileChooser = new JFileChooser();
+            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+                    "Images", "png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp");
+            fileChooser.setFileFilter(imageFilter);
+            fileChooser.setSelectedFile(new java.io.File("image.png")); // Default file name with .png extension
             int result = fileChooser.showSaveDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 controller.saveImage(fileChooser.getSelectedFile());
@@ -557,7 +563,6 @@ public class ImageView extends JFrame {
             colorDisplayPanel.setBackground(pickedColor);
         }
     }
-    
 
     public void setController(ImageController controller) {
         this.controller = controller;
@@ -592,7 +597,7 @@ public class ImageView extends JFrame {
     }
 
     public void updateImage(BufferedImage image) {
-       this.image = image;
+        this.image = image;
         imageLabel.setIcon(new ImageIcon(image));
         imageLabel.repaint();
     }
@@ -609,13 +614,13 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
-                } else  if (isDrawingRectangle || isDrawingCircle) {
-                   clickX = e.getX();
-                     clickY = e.getY();
-                     selectedShape = null;
-                    lastMousePosition = null; 
+                } else if (isDrawingRectangle || isDrawingCircle) {
+                    clickX = e.getX();
+                    clickY = e.getY();
+                    selectedShape = null;
+                    lastMousePosition = null;
                 }
-                
+
             }
 
             @Override
@@ -648,7 +653,7 @@ public class ImageView extends JFrame {
                         int endX = e.getX();
                         int endY = e.getY();
 
-                        if(e.getX() < clickX) {
+                        if (e.getX() < clickX) {
                             startX = e.getX();
                             endX = clickX;
                         } else {
@@ -656,7 +661,7 @@ public class ImageView extends JFrame {
                             startX = clickX;
                         }
 
-                        if(e.getY() < clickY) {
+                        if (e.getY() < clickY) {
                             startY = e.getY();
                             endY = clickY;
                         } else {
@@ -667,13 +672,11 @@ public class ImageView extends JFrame {
                         int width = Math.abs(endX - startX);
                         int height = Math.abs(endY - startY);
 
-
                         if (!currentShape.isRectangle()) {
                             int diameter = Math.max(width, height);
                             width = diameter;
                             height = diameter;
                         }
-                    
 
                         currentShape.setX(startX);
                         currentShape.setY(startY);

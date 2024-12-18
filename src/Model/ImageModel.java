@@ -6,11 +6,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.imageio.ImageIO;
 
 import Controller.ImageController;
-
 
 public class ImageModel {
     private BufferedImage image;
@@ -35,39 +36,53 @@ public class ImageModel {
     }
 
     public void applyPaintBucket(int x, int y, Color newColor, int tolerance) {
-        if (image == null) return;
-        
+        if (image == null)
+            return;
+
         int targetColor = image.getRGB(x, y);
         boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        floodFill(x, y, targetColor, newColor.getRGB(), tolerance, visited);
+        floodFill(x, y, targetColor, newColor.getRGB(), tolerance);
     }
 
-    private void floodFill(int x, int y, int targetColor, int newColor, int tolerance, boolean[][] visited) {
-        if (x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) return;
-        if (visited[x][y]) return;
-        visited[x][y] = true;
+    public void floodFill(int x, int y, int targetColor, int newColor, int tolerance) {
+        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(new Point(x, y));
 
-        int currentColor = image.getRGB(x, y);
-        if (!isWithinTolerance(targetColor, currentColor, tolerance)) return;
+        while (!queue.isEmpty()) {
+            Point p = queue.poll();
+            int px = p.x;
+            int py = p.y;
 
-        image.setRGB(x, y, newColor);
+            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+                continue;
+            if (visited[px][py])
+                continue;
 
-        floodFill(x + 1, y, targetColor, newColor, tolerance, visited);
-        floodFill(x - 1, y, targetColor, newColor, tolerance, visited);
-        floodFill(x, y + 1, targetColor, newColor, tolerance, visited);
-        floodFill(x, y - 1, targetColor, newColor, tolerance, visited);
+            int currentColor = image.getRGB(px, py);
+            if (!isWithinTolerance(targetColor, currentColor, tolerance))
+                continue;
+
+            image.setRGB(px, py, newColor);
+            visited[px][py] = true;
+
+            queue.add(new Point(px + 1, py));
+            queue.add(new Point(px - 1, py));
+            queue.add(new Point(px, py + 1));
+            queue.add(new Point(px, py - 1));
+        }
     }
 
     private boolean isWithinTolerance(int color1, int color2, int tolerance) {
         int r1 = (color1 / 256) / 256;
-		int g1 = (color1 / 256) % 256;
-		int b1 = color1 % 256;
+        int g1 = (color1 / 256) % 256;
+        int b1 = color1 % 256;
 
-		int r2 = (color2 / 256) / 256;
-		int g2 = (color2 / 256) % 256;
-		int b2 = color2 % 256;
+        int r2 = (color2 / 256) / 256;
+        int g2 = (color2 / 256) % 256;
+        int b2 = color2 % 256;
 
-		return Math.sqrt(Math.pow(r1-r2, 2) + Math.pow(g1-g2, 2) + Math.pow(b1-b2, 2)) < tolerance;
+        return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)) < tolerance;
     }
 
     // Appliquer une rotation
@@ -106,33 +121,33 @@ public class ImageModel {
         return new Color(rgb);
     }
 
-
     public void rotateByAngle(int angle) {
-        if (image == null) return;
-    
+        if (image == null)
+            return;
+
         int width = image.getWidth();
         int height = image.getHeight();
-    
+
         // Calcul d'une nouvelle taille pour éviter la coupe
         double radians = Math.toRadians(angle);
         int newWidth = (int) Math.round(Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians)));
         int newHeight = (int) Math.round(Math.abs(height * Math.cos(radians)) + Math.abs(width * Math.sin(radians)));
-    
+
         BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, image.getType());
         Graphics2D g2d = rotatedImage.createGraphics();
-    
+
         // Translation et rotation
         g2d.translate((newWidth - width) / 2.0, (newHeight - height) / 2.0);
         g2d.rotate(radians, width / 2.0, height / 2.0);
         g2d.drawImage(image, 0, 0, null);
-    
+
         g2d.dispose();
         image = rotatedImage;
     }
-    
 
     public void flip(boolean horizontal) {
-        if (image == null) return;
+        if (image == null)
+            return;
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage flippedImage = new BufferedImage(width, height, image.getType());
@@ -194,10 +209,10 @@ public class ImageModel {
     private int clamp(int value) {
         return Math.min(Math.max(value, 0), 255);
     }
-    
 
     public void addText(String text, Font font, Color color, int x, int y) {
-        if (image == null) return;
+        if (image == null)
+            return;
         Graphics2D g2d = image.createGraphics();
         g2d.setFont(font);
         g2d.setColor(color);

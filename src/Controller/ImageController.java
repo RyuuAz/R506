@@ -4,17 +4,12 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import java.awt.event.*;
-import Vue.*;
-
-
 import Model.ImageModel;
 import Vue.ImageView;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.awt.Point;
 
 public class ImageController {
@@ -69,7 +64,6 @@ public class ImageController {
         Color color = model.pickColor(x, y);
         view.displayPickedColor(color);
     }
-    
 
     public void flipImage(boolean horizontal) {
         model.flip(horizontal);
@@ -91,10 +85,7 @@ public class ImageController {
         view.updateImage(model.getImage());
     }
 
-    
-    
-
     public static void main(String[] args) {
-       new ImageController();
+        new ImageController();
     }
 }
