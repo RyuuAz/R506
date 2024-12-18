@@ -436,6 +436,9 @@ public class Menu extends JPanel {
 			int result = fileChooser.showOpenDialog(this);
 			if (result == JFileChooser.APPROVE_OPTION) {
 				controller.openImage(fileChooser.getSelectedFile());
+				int imageWidth = view.getImageTemp().getWidth();
+        		int imageHeight = view.getImageTemp().getHeight();
+				view.setImageTaille(imageWidth, imageHeight);
 			}
 		}
 	}
@@ -449,7 +452,7 @@ public class Menu extends JPanel {
             fileChooser.setSelectedFile(new java.io.File("image.png")); // Default file name with .png extension
             int result = fileChooser.showSaveDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                controller.saveImage(fileChooser.getSelectedFile());
+                controller.saveImage(view.getImageTemp(), fileChooser.getSelectedFile());
             }
         }
     }

@@ -33,6 +33,8 @@ public class ImageView extends JFrame {
     private boolean isPasting = false;
     private int clickX, clickY;
 
+    private int imageWidth, imageHeight, labelWidth, labelHeight;
+
     private BufferedImage image, imageTemp, imagePaste = null;
 
     public ImageView(ImageController controller) {
@@ -73,7 +75,8 @@ public class ImageView extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 if (imageTemp != null) {
-                    g.drawImage(imageTemp, 0, 0, imageTemp.getWidth(), imageTemp.getHeight(), this);
+                    // Dessiner l'image temporaire au même emplacement que l'imageLabel
+                    g.drawImage(imageTemp, imageLabel.getWidth(), imageLabel.getHeight(), imageTemp.getWidth(), imageTemp.getHeight(), this);
                 }
                 if (shape != null) {
                     Graphics2D g2d = (Graphics2D) g;
@@ -85,19 +88,16 @@ public class ImageView extends JFrame {
             }
         };
 
-        imageLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        imageLabel.setBackground(Color.YELLOW);
-       
-        
-
         // Initialiser les variables
         this.shape = null;
-
-        
 
         // Centrer l'image dans le JLabel
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setVerticalAlignment(JLabel.CENTER);
+
+        labelWidth = imageLabel.getWidth();
+        labelHeight = imageLabel.getHeight();
+
 
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
@@ -121,22 +121,21 @@ public class ImageView extends JFrame {
                     int x = evt.getX();
                     int y = evt.getY();
 
-                    // Ajustement des coordonnées
-                    int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
-                    int imageY = y - (imageLabel.getHeight() - image.getHeight()) / 2;
+                    System.out.println("x: " + x + " y: " + y);
+                  
+                    int imageX = x - (labelWidth - imageWidth) / 2;
+                    int imageY = y - (labelHeight - imageHeight) / 2;
 
-                    Graphics2D g2d = (Graphics2D) imageTemp.getGraphics();
-                     //fairt un cercle
-                    g2d.drawOval(x, y, 20, 20);
+                    System.out.println("imageX: " + imageX + " imageY: " + imageY);
 
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
                             //Vérifiez si il y a une forme sélectionnée
                             if (shape != null) {
-                                controller.applyPaintBucket(imageX, imageY, pickedColor, menu.getSliderValue(), shape);
+                                updateImage(controller.applyPaintBucket(getImageTemp(),imageX, imageY, pickedColor, menu.getSliderValue(), shape, imageLabel));
                             } else {
-                            controller.applyPaintBucket(imageX, imageY, pickedColor, menu.getSliderValue(), null);
+                                updateImage(controller.applyPaintBucket(getImageTemp(),imageX, imageY, pickedColor, menu.getSliderValue(), null, imageLabel));
                             }
                         }
                     }
@@ -162,7 +161,7 @@ public class ImageView extends JFrame {
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
                         if (controller != null) {
-                            controller.pickColor(imageX, imageY);
+                            pickColor(imageX, imageY);
                         }
                     }
 
@@ -463,6 +462,19 @@ public class ImageView extends JFrame {
 
             shape.moveTo((int) (shape.getX() * scaleX), (int) (shape.getY() * scaleY));
         }
+    }
+
+    public void pickColor(int x, int y) {
+        if (image == null || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) {
+            return;
+        }
+        int rgb = image.getRGB(x, y);
+        this.displayPickedColor(new Color(rgb));
+    }
+
+    public void setImageTaille (int width, int height) {
+        this.imageWidth = width;
+        this.imageHeight = height;
     }
 
 }

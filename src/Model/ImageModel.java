@@ -17,53 +17,56 @@ import Controller.ImageController;
 import Vue.Shape;
 
 public class ImageModel {
-    private BufferedImage image;
     private ImageController controller;
 
     public ImageModel(ImageController controller) {
         this.controller = controller;
-        this.image = image;
     }
 
-    public void loadImageFromFile(File file) throws IOException {
-        image = ImageIO.read(file);
+    public BufferedImage loadImageFromFile(File file) throws IOException {
+        BufferedImage image = readImageFromFile(file);
+        return image;
     }
 
-    public void saveImageToFile(File file, String format) throws IOException {
+    private BufferedImage readImageFromFile(File file) throws IOException {
+        return ImageIO.read(file);
+    }
+
+    public void saveImageToFile(BufferedImage image, File file, String format) throws IOException {
         if (image != null) {
             ImageIO.write(image, format, file);
         }
     }
 
-    public BufferedImage getImage() {
-        return image;
-    }
-
-
-    public void setImage(BufferedImage image) {
-        this.image = image;
-    }
-
     public Point convertToImageCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
-        double scaleX = (double) image.getWidth() / imageLabel.getWidth();
-        double scaleY = (double) image.getHeight() / imageLabel.getHeight();
+        double scaleX = (double) imageTemp.getWidth() / imageLabel.getWidth();
+        double scaleY = (double) imageTemp.getHeight() / imageLabel.getHeight();
     
         return new Point((int) (x * scaleX), (int) (y * scaleY));
     }
 
-
-    public void applyPaintBucket(int x, int y, Color newColor, int tolerance, Shape shape) {
-        if (image == null)
-            return;
-
-        int targetColor = image.getRGB(x, y);
-        if (shape == null)
-            floodFill(x, y, targetColor, newColor.getRGB(), tolerance);
-        else
-            floodFillShape(x, y, targetColor, newColor.getRGB(), tolerance, shape);
+    public Point convertToLabelCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
+        double scaleX = (double) imageTemp.getWidth() / imageLabel.getWidth();
+        double scaleY = (double) imageTemp.getHeight() / imageLabel.getHeight();
+    
+        return new Point((int) (x / scaleX), (int) (y / scaleY));
     }
 
-    public void floodFill(int x, int y, int targetColor, int newColor, int tolerance) {
+
+    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color newColor, int tolerance, Shape shape, JLabel imageLabel) {
+        if (image == null){
+        System.out.println("image is null");
+            return null; }
+            System.out.println("ici");
+        int targetColor = image.getRGB(x, y);
+        if (shape == null){System.out.println("shape is null");
+            return floodFill(image, x, y, targetColor, newColor.getRGB(), tolerance);
+    }  
+        else {System.out.println("shape is not null");
+            return floodFillShape(image, x, y, targetColor, newColor.getRGB(), tolerance, shape, imageLabel);}
+    }
+
+    public BufferedImage floodFill(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance) {
         boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
         Queue<Point> queue = new LinkedList<>();
         queue.add(new Point(x, y));
@@ -90,14 +93,18 @@ public class ImageModel {
             queue.add(new Point(px, py + 1));
             queue.add(new Point(px, py - 1));
         }
+
+        return image;
     }
 
-    public void floodFillShape(int x, int y, int targetColor, int newColor, int tolerance, Shape shape) {
-        if (targetColor == newColor) return;  // Pas besoin de remplir si la couleur cible est identique
+    public BufferedImage floodFillShape(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance, Shape shape, JLabel imageLabel) {
+        if (targetColor == newColor) return null;  // Pas besoin de remplir si la couleur cible est identique
     
         boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
         Queue<Point> queue = new LinkedList<>();
         queue.add(new Point(x, y));
+
+        System.out.println("x: " + x + " y: " + y);
 
         while (!queue.isEmpty()) {
             Point p = queue.poll();
@@ -113,7 +120,13 @@ public class ImageModel {
             if (!isWithinTolerance(targetColor, currentColor, tolerance))
                 continue;
 
-            if (shape.contains(px, py)) {
+            System.out.println("px: " + px + " py: " + py);
+            System.out.println("shape.contains(px, py): " + shape.contains(px, py));
+            System.out.println("shape.x: " + shape.getX() + " shape.y: " + shape.getY());
+
+            Point tmpPoint = convertToLabelCoordinates(px, py, imageLabel, image);
+
+            if (shape.contains(tmpPoint.x, tmpPoint.y)) {
                 image.setRGB(px, py, newColor);
                 visited[px][py] = true;
 
@@ -123,6 +136,8 @@ public class ImageModel {
                 queue.add(new Point(px, py - 1));
             }
         }
+
+        return image;
     }
 
     private boolean isWithinTolerance(int color1, int color2, int tolerance) {
@@ -148,14 +163,6 @@ public class ImageModel {
             // Rotation antihoraire : tourner et déplacer l'image
             return rotateImageInverse(source, -90);
         }
-    }
-
-    public Color pickColor(int x, int y) {
-        if (image == null || x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) {
-            return null; // Coordonnées invalides ou image absente
-        }
-        int rgb = image.getRGB(x, y);
-        return new Color(rgb);
     }
 
     public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees)
@@ -258,15 +265,5 @@ public class ImageModel {
     // Méthode pour limiter la valeur entre 0 et 255
     private int clamp(int value) {
         return Math.min(Math.max(value, 0), 255);
-    }
-
-    public void addText(String text, Font font, Color color, int x, int y) {
-        if (image == null)
-            return;
-        Graphics2D g2d = image.createGraphics();
-        g2d.setFont(font);
-        g2d.setColor(color);
-        g2d.drawString(text, x, y);
-        g2d.dispose();
     }
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import Model.ImageModel;
@@ -22,7 +23,6 @@ public class ImageController {
  // Liste des fenêtres ouvertes
     private BufferedImage clipboard; // Pour gérer le copier/coller
     private Shape shape;
-    private BufferedImage image;
 
     public ImageController() {
         this.views = new ArrayList<>();
@@ -41,21 +41,22 @@ public class ImageController {
 
     public void openImage(File file) {
         try {
-            if (activeView != null) {
-                activeView.dispose(); // Ferme la fenêtre active
+            if (activeView.getImage() == null) {
+                activeView.updateImage(model.loadImageFromFile(file)); // Ferme la fenêtre active
             }
-            model.loadImageFromFile(file);
-            openNewView(model.getImage()); // Crée une nouvelle fenêtre avec l'image
+            else {
+                openNewView(model.loadImageFromFile(file));
+            } // Crée une nouvelle fenêtre avec l'image
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to open image: " + e.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void saveImage(File file) {
+    public void saveImage(BufferedImage image, File file) {
         try {
             String format = "png"; // Format par défaut
-            model.saveImageToFile(file, format);
+            model.saveImageToFile(image, file, format);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to save image: " + e.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -86,7 +87,6 @@ public class ImageController {
 
     public void setActiveView(ImageView view) {
         this.activeView = view;
-        model.setImage(view.getImage());
     }
 
     public void removeView(ImageView view) {
@@ -101,9 +101,8 @@ public class ImageController {
         return model.convertToImageCoordinates(x, y, activeView.getImageLabel(), activeView.getImageTemp());
     }
 
-    public void applyPaintBucket(int x, int y, Color color, int tolerance, Shape shape) {
-        model.applyPaintBucket(x, y, color, tolerance, shape);
-        activeView.updateImage(model.getImage());
+    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color color, int tolerance, Shape shape, JLabel imageLabel) {
+        return model.applyPaintBucket(image, x, y, color, tolerance, shape, imageLabel);
     }
 
     public BufferedImage rotate(BufferedImage image, boolean clockwise) {
@@ -112,11 +111,6 @@ public class ImageController {
 
     public BufferedImage rotateImageByAngle(BufferedImage image, int angle) {
         return model.rotateImageInverse(image, angle);
-    }
-
-    public void pickColor(int x, int y) {
-        Color color = model.pickColor(x, y);
-        activeView.displayPickedColor(color);
     }
 
     public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
@@ -129,11 +123,6 @@ public class ImageController {
 
     public BufferedImage adjustContrast(BufferedImage image, int contrast) {
         return model.adjustContrast(image, contrast);
-    }
-
-    public void addTextToImage(String text, Font font, Color color, int x, int y) {
-        model.addText(text, font, color, x, y);
-        activeView.updateImage(model.getImage());
     }
 
     public static void main(String[] args) {

@@ -3,7 +3,6 @@ package Vue;
 import javax.swing.*;
 import java.awt.*;
 
-
 public class ToolBar extends JToolBar {
     private JPanel colorDisplayPanel;
 
@@ -13,17 +12,23 @@ public class ToolBar extends JToolBar {
         setFloatable(true);
         setRollover(true); // Pour un effet visuel au survol
 
+        // Utiliser un GridLayout pour organiser les boutons en deux colonnes
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 5, 5)); // 0 lignes signifie un nombre de lignes dynamique, 2 colonnes, 5 pixels d'espace entre les composants
+
         // Ajouter des boutons à la barre d'outils
         JButton paintBucketButton = createToolButton("Seau de peinture", "paintbucket.png");
         JButton pickColorButton = createToolButton("Pipette", "pipette.png");
         JButton selectRectangleButton = createToolButton("Sélection Rectangle", "rectangle.png");
         JButton selectCircleButton = createToolButton("Sélection Cercle", "circle.png");
 
-        // Ajouter des boutons à la barre d'outils
-        add(paintBucketButton);
-        add(pickColorButton);
-        add(selectRectangleButton);
-        add(selectCircleButton);
+        // Ajouter des boutons au panneau de boutons
+        buttonPanel.add(paintBucketButton);
+        buttonPanel.add(pickColorButton);
+        buttonPanel.add(selectRectangleButton);
+        buttonPanel.add(selectCircleButton);
+
+        // Ajouter le panneau de boutons à la barre d'outils
+        add(buttonPanel);
 
         // Ajouter un séparateur entre les groupes d'outils
         addSeparator();
@@ -33,6 +38,9 @@ public class ToolBar extends JToolBar {
         colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
         colorDisplayPanel.setBackground(Color.WHITE); // Couleur initiale (blanc)
         add(colorDisplayPanel);
+
+        // Définir la taille préférée de la barre d'outils
+        setPreferredSize(new Dimension(200, 100)); // Ajustez les dimensions selon vos besoins
     }
 
     // Méthode pour créer un bouton d'outil avec une icône
@@ -43,6 +51,7 @@ public class ToolBar extends JToolBar {
         button.setText(toolName); // Afficher le nom de l'outil sous l'icône
         button.setHorizontalTextPosition(SwingConstants.CENTER);
         button.setVerticalTextPosition(SwingConstants.BOTTOM);
+        button.setPreferredSize(null); // Laisser le bouton prendre la taille nécessaire
         return button;
     }
 
