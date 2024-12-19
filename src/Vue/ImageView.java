@@ -1,5 +1,6 @@
 package Vue;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
@@ -11,13 +12,14 @@ import Controller.ImageController;
 import Model.ImageModel;
 
 import java.awt.image.BufferedImage;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
-
+import java.io.IOException;
 
 import Controller.ImageController;
 import Model.ImageModel;
@@ -360,67 +362,121 @@ public class ImageView extends JFrame {
                 // Créer un JPanel personnalisé avec plusieurs composants
                 JPanel panel = new JPanel();
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-                
+        
                 // Champ de texte pour saisir le texte à ajouter
                 JTextField textField = new JTextField(20);
                 panel.add(new JLabel("Entrez le texte de votre choix :"));
                 panel.add(textField);
-                
+        
                 // Sélecteur de police (JComboBox)
                 String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
                 JComboBox<String> fontComboBox = new JComboBox<>(fonts);
                 panel.add(new JLabel("Choisissez la police :"));
                 panel.add(fontComboBox);
-                
+        
                 // Sélecteur de taille de police (JSpinner)
                 SpinnerModel sizeModel = new SpinnerNumberModel(20, 1, 100, 1); // Min 1, Max 100, Incr 1
                 JSpinner fontSizeSpinner = new JSpinner(sizeModel);
                 panel.add(new JLabel("Choisissez la taille de la police :"));
                 panel.add(fontSizeSpinner);
-                
+        
                 // Sélecteur de couleur (JColorChooser)
                 JButton colorButton = new JButton("Choisir la couleur");
                 panel.add(new JLabel("Choisissez la couleur :"));
                 panel.add(colorButton);
-                
+        
                 // Ouvrir le JColorChooser quand on clique sur le bouton
                 Color[] selectedColor = new Color[1];
                 colorButton.addActionListener(ae -> {
                     selectedColor[0] = JColorChooser.showDialog(ImageView.this, "Sélectionner une couleur", Color.BLACK);
                 });
-                
+        
+                // Bouton pour importer une texture
+                JButton textureButton = new JButton("Importer une texture");
+                textureButton.setEnabled(false); // Désactivé par défaut
+                panel.add(new JLabel("Ou choisissez une texture :"));
+                panel.add(textureButton);
+        
+                BufferedImage[] textureImage = new BufferedImage[1];
+                textureButton.addActionListener(ae -> {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "png", "jpeg"));
+                    int result = fileChooser.showOpenDialog(ImageView.this);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        try {
+                            textureImage[0] = ImageIO.read(fileChooser.getSelectedFile());
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(ImageView.this, 
+                                    "Erreur lors du chargement de la texture.",
+                                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+        
+                // Checkbox pour activer ou désactiver la texture
+                JCheckBox useTextureCheckBox = new JCheckBox("Activer la texture");
+                panel.add(useTextureCheckBox);
+        
+                // Activer/Désactiver le bouton texture et couleur en fonction de la checkbox
+                useTextureCheckBox.addItemListener(ae -> {
+                    boolean textureEnabled = useTextureCheckBox.isSelected();
+                    textureButton.setEnabled(textureEnabled);  // Activer/Désactiver le bouton texture
+                    colorButton.setEnabled(!textureEnabled);  // Désactiver le bouton couleur si texture activée
+                });
+        
                 // Afficher la boîte de dialogue avec les champs
                 int option = JOptionPane.showConfirmDialog(ImageView.this, panel, "Ajouter du texte à l'image",
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-                
+        
                 if (option == JOptionPane.OK_OPTION) {
                     try {
+                        // Vérifier si le champ texte est rempli
+                        String text = textField.getText().trim();
+                        if (text.isEmpty()) {
+                            JOptionPane.showMessageDialog(ImageView.this, 
+                                    "Veuillez entrer un texte avant de valider.", 
+                                    "Champ vide", JOptionPane.WARNING_MESSAGE);
+                            return; // Réafficher la boîte de dialogue
+                        }
+        
                         // Récupérer les valeurs des champs
-                        String text = textField.getText();
                         String selectedFont = (String) fontComboBox.getSelectedItem();
                         int fontSize = (Integer) fontSizeSpinner.getValue();
-                        Color color = selectedColor[0] != null ? selectedColor[0] : Color.BLACK;
-
                         Font font = new Font(selectedFont, Font.PLAIN, fontSize);
-                        int x = ((imageLabel.getWidth() - imageTemp.getWidth()) / 2 ) +imageTemp.getWidth()/2;
-                        int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2 ) +imageTemp.getHeight()/2; 
+        
+                        // Activer ou désactiver la texture
+                        TexturePaint texturePaint = null;
+                        if (useTextureCheckBox.isSelected() && textureImage[0] != null) {
+                            // Créer un TexturePaint pour appliquer la texture
+                            Rectangle2D rect = new Rectangle2D.Double(0, 0, textureImage[0].getWidth(), textureImage[0].getHeight());
+                            texturePaint = new TexturePaint(textureImage[0], rect);
+                        }
+                        Color color = selectedColor[0] != null ? selectedColor[0] : Color.BLACK;
+        
+                        // Calcul des coordonnées
+                        int x = ((imageLabel.getWidth() - imageTemp.getWidth()) / 2) + imageTemp.getWidth() / 2;
+                        int y = ((imageLabel.getHeight() - imageTemp.getHeight()) / 2) + imageTemp.getHeight() / 2;
                         int width = getTextWidth(text, font);
-
-                        RenderText renderText = new RenderText(x, y, text, font, color,width);
-
-                        shapeTextes.add( new Shape(x-20, y - fontSize, width+20, fontSize+20, true, color,renderText));
+        
+                        // Créer le RenderText
+                        RenderText renderText = new RenderText(x, y, text, font, color, width);
+                        if (texturePaint != null) {
+                            renderText.setTexture(texturePaint); // Appliquer la texture
+                        }
+        
+                        // Ajouter le texte et rafraîchir l'image
+                        shapeTextes.add(new Shape(x - 20, y - fontSize, width + 20, fontSize + 20, true, color, renderText));
                         renderTexts.add(renderText);
-
                         imageLabel.repaint();
-
-
+        
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(ImageView.this, "Erreur d'entrée ! Veuillez entrer des valeurs valides.",
                                 "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
-        });
+        });        
+        
 
         addMouseListeners();
 
