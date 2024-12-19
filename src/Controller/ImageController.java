@@ -1,32 +1,28 @@
 package Controller;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-
 import Model.ImageModel;
 import Vue.ImageView;
 import Vue.Shape;
-
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.image.BufferedImage;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class ImageController {
     private ImageModel model;
     private List<ImageView> views;
     private ImageView activeView; // Vue active
- // Liste des fenêtres ouvertes
+    // Liste des fenêtres ouvertes
     private BufferedImage clipboard; // Pour gérer le copier/coller
     private Shape shape;
-  
 
     public ImageController() {
-        this.model = new ImageModel();
         this.views = new ArrayList<>();
+        this.model = new ImageModel(this);
         openNewView(null); // Ouvrir une première fenêtre sans image
     }
 
@@ -41,18 +37,21 @@ public class ImageController {
 
     public void openImage(File file) {
         try {
-            model.loadImageFromFile(file);
-            openNewView(model.getImage()); // Crée une nouvelle fenêtre avec l'image
+            if (activeView.getImage() == null) {
+                activeView.updateImage(model.loadImageFromFile(file)); // Ferme la fenêtre active
+            } else {
+                openNewView(model.loadImageFromFile(file));
+            } // Crée une nouvelle fenêtre avec l'image
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to open image: " + e.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void saveImage(File file) {
+    public void saveImage(BufferedImage image, File file) {
         try {
             String format = "png"; // Format par défaut
-            model.saveImageToFile(file, format);
+            model.saveImageToFile(image, file, format);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Failed to save image: " + e.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -61,7 +60,7 @@ public class ImageController {
 
     public void copyImage(BufferedImage image,Shape shape) {
         clipboard = image; // Sauvegarde l'image dans le presse-papiers
-        this.shape=shape;
+        this.shape = shape;
     }
 
     public void pasteImage(ImageView targetView) {
@@ -83,7 +82,6 @@ public class ImageController {
 
     public void setActiveView(ImageView view) {
         this.activeView = view;
-        model.setImage(view.getImage());
     }
 
     public void removeView(ImageView view) {
@@ -92,47 +90,34 @@ public class ImageController {
             System.exit(0);// Ouvre une nouvelle fenêtre si toutes les fenêtres sont fermées
         }
     }
-    
 
-
-    public void applyPaintBucket(int x, int y, Color color, int tolerance) {
-        model.applyPaintBucket(x, y,color,tolerance ,shape);
-        activeView.updateImage(model.getImage());
+    public Point convertToImageCoordinates(int x, int y) {
+        return model.convertToImageCoordinates(x, y, activeView.getImageLabel(), activeView.getImageTemp());
     }
 
-    public void rotate(boolean clockwise) {
-        model.rotate(clockwise);
-        activeView.updateImage(model.getImage());
+    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color color, int tolerance, Shape shape,
+            JLabel imageLabel) {
+        return model.applyPaintBucket(image, x, y, color, tolerance, shape, imageLabel);
     }
 
-    public void rotateImageByAngle(int angle) {
-        model.rotateByAngle(angle);
-        activeView.updateImage(model.getImage());
+    public BufferedImage rotate(BufferedImage image, boolean clockwise) {
+        return model.rotateImage(image, clockwise);
     }
 
-    public void pickColor(int x, int y) {
-        Color color = model.pickColor(x, y);
-        activeView.displayPickedColor(color);
+    public BufferedImage rotateImageByAngle(BufferedImage image, int angle) {
+        return model.rotateImageInverse(image, angle);
     }
 
-    public void flipImage(boolean horizontal) {
-        model.flip(horizontal);
-        activeView.updateImage(model.getImage());
+    public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
+        return model.flipImage(image, horizontal);
     }
 
-    public void adjustBrightness(int brighten) {
-        model.adjustBrightness(brighten);
-        activeView.updateImage(model.getImage());
+    public BufferedImage adjustBrightness(BufferedImage image, int brighten) {
+        return model.adjustBrightness(image, brighten);
     }
 
-    public void adjustContrast(int contrast) {
-        model.adjustContrast(contrast);
-        activeView.updateImage(model.getImage());
-    }
-
-    public void addTextToImage(String text, Font font, Color color, int x, int y) {
-        model.addText(text, font, color, x, y);
-        activeView.updateImage(model.getImage());
+    public BufferedImage adjustContrast(BufferedImage image, int contrast) {
+        return model.adjustContrast(image, contrast);
     }
 
     public static void main(String[] args) {
