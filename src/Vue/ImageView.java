@@ -32,7 +32,7 @@ public class ImageView extends JFrame {
     private ImageController controller;
     private ImageModel model;
     private Color pickedColor;
-    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor,isCopyingWithoutColor = false;
+    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor,isCopyingWithoutColor,isSelectingAll = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
@@ -318,6 +318,7 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
+                   
                     
                 } else if (isDrawingRectangle || isDrawingCircle) {
                     clickX = e.getX();
@@ -329,7 +330,9 @@ public class ImageView extends JFrame {
 
                     for (Shape shapeTexte : shapeTextes) {
                         if (shapeTexte.contains(e.getX(), e.getY())) {
+                            
                             selectedShape = shapeTexte;
+                            shapeTexte.setIsSelected(true);
                             lastMousePosition = e.getPoint();
                             break;
                         }
@@ -344,11 +347,14 @@ public class ImageView extends JFrame {
                 if (currentShape != null) {
                     shape = currentShape; // Ajoute la forme temporaire à la liste des formes
                     currentShape = null; // Réinitialise la forme temporaire
-
                 }
-                selectedShape = null;
+                
                 isDrawingCircle = false;
                 isDrawingRectangle = false;
+                for (Shape shapeTexte : shapeTextes) {
+                    shapeTexte.setIsSelected(false);
+                }
+                selectedShape = null;
             }
         });
 
@@ -361,8 +367,20 @@ public class ImageView extends JFrame {
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
                     if (selectedShape.getRenderText() != null) {
                         selectedShape.getRenderText().moveTo(selectedShape.getRenderText().getX() + deltaX, selectedShape.getRenderText().getY() + deltaY);
-                    }
+                        if (shapeTextes.size() >1 ) {
+                            for (Shape shapeTexte : shapeTextes) {
+                                if (shapeTexte != selectedShape ) {
+                                    if(shapeTexte.getIsSelected()){
+                                        shapeTexte.moveTo(shapeTexte.getX() + deltaX, shapeTexte.getY() + deltaY);
+                                    shapeTexte.getRenderText().moveTo(shapeTexte.getRenderText().getX() + deltaX, shapeTexte.getRenderText().getY() + deltaY);
+                                    }
 
+                                    
+                                }
+                            }
+                        }
+                    }
+                    
                     lastMousePosition = e.getPoint();
                     imageLabel.repaint();
                 } else if ((isDrawingCircle || isDrawingRectangle)) {
@@ -401,6 +419,7 @@ public class ImageView extends JFrame {
                         currentShape.setX(startX);
                         currentShape.setY(startY);
                         currentShape.resize(width, height);
+                        
                     } else {
                         currentShape = new Shape(e.getX(), e.getY(), 0, 0, isDrawingRectangle, Color.RED,null); // Initialise
                         shape = null; // une forme
@@ -667,5 +686,4 @@ public class ImageView extends JFrame {
         this.shape = null;
         imageLabel.repaint();
     }
-
 }

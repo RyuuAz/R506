@@ -384,6 +384,16 @@ public class Menu extends JPanel {
         KeyStroke copyKeyStroke = KeyStroke.getKeyStroke("control C");
         KeyStroke copyWithoutBackgroundKeyStroke = KeyStroke.getKeyStroke("control shift C");
         KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke("control V");
+        KeyStroke selectedShapeStroke = KeyStroke.getKeyStroke("control A");
+
+        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(selectedShapeStroke, "selectedShapeStroke");
+        openItem.getActionMap().put("selectedShapeStroke", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleSelectAllShapes(e);
+
+            }
+        });
 
         openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
         openItem.getActionMap().put("open", new AbstractAction() {
@@ -567,6 +577,16 @@ public class Menu extends JPanel {
                 }
             }
         });
+
+        
+    }
+
+    private void handleSelectAllShapes(ActionEvent e) {
+        if (controller != null) {
+            for (Shape shape : view.getShapeTextes()) {
+                shape.setIsSelected(true);
+            }
+        }
 
         
     }

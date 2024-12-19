@@ -10,7 +10,8 @@ public class Shape {
     private boolean isRectangle; // true pour rectangle, false pour cercle
     private Color color;
     private RenderText renderText = null;
-    private boolean isOver = false;
+    private boolean isOver, isSelected = false;
+
 
     public Shape(int x, int y, int width, int height, boolean isRectangle, Color color, RenderText renderText) {
         this.x = x;
@@ -40,6 +41,14 @@ public class Shape {
             double radius = width / 2.0;
             return Math.pow(px - centerX, 2) + Math.pow(py - centerY, 2) <= Math.pow(radius, 2);
         }
+    }
+
+    public boolean getIsSelected() {
+        return isSelected;
+    }
+
+    public void setIsSelected(boolean isSelected) {
+        this.isSelected = isSelected;
     }
 
     public void moveTo(int newX, int newY) {
