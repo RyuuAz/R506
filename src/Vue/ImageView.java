@@ -148,6 +148,23 @@ public class ImageView extends JFrame {
             }
         });
 
+        // Event pour ouvire un menu au clic droit
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (shape != null && e.isPopupTrigger() && shape.contains(e.getX(), e.getY())) {
+                    showMenu(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (shape != null && e.isPopupTrigger() && shape.contains(e.getX(), e.getY())) {
+                    showMenu(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+
         // Event pour la pipette
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -475,4 +492,41 @@ public class ImageView extends JFrame {
     public void setColor(Color color) {
         this.pickedColor = color;
     }
+
+    // Méthode pour afficher le menu avec uniquement les éléments nécessaires copier, copier sans fond, supprimer
+    public void showMenu(Component parent, int x, int y) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem copierItem = new JMenuItem("Copier");
+        JMenuItem copierSansFItem = new JMenuItem("Copier sans fond");
+        JMenuItem supprimerItem = new JMenuItem("Supprimer");
+
+        copierItem.addActionListener(e -> {
+            if (controller != null) {
+                copyImage();
+            }
+        });
+
+        copierSansFItem.addActionListener(e -> {
+            if (controller != null) {
+                //copyImageWithoutBackground();
+            }
+        });
+
+        supprimerItem.addActionListener(e -> {
+            if (controller != null) {
+                deleteSelectedShape();
+            }
+        });
+
+        menu.add(copierItem);
+        menu.add(copierSansFItem);
+        menu.add(supprimerItem);
+        menu.show(parent, x, y);
+    }
+
+    public void deleteSelectedShape() {
+        this.shape = null;
+        imageLabel.repaint();
+    }
+
 }
