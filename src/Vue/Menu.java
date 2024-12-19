@@ -518,6 +518,13 @@ public class Menu extends JPanel {
                         slider.setValue(value);
                     }
                 }
+                public void mouseDragged(MouseEvent e) {
+                    if (slider.isEnabled()) {
+                        int value = valueForXPosition(e.getX());
+                        slider.setValue(value);
+                        slider.repaint();
+                    }
+                }
             });
         }
 

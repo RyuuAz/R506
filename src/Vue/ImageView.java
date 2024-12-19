@@ -53,7 +53,6 @@ public class ImageView extends JFrame {
 
     private int imageWidth, imageHeight, labelWidth, labelHeight;
 
-    private BufferedImage image, imageTemp, imagePaste = null;
     private BufferedImage image, imageTemp,imageCopy ,imagePaste,originalImage = null;
 
     public ImageView(ImageController controller) {
@@ -129,6 +128,8 @@ public class ImageView extends JFrame {
         labelWidth = imageLabel.getWidth();
         labelHeight = imageLabel.getHeight();
 
+        
+
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -168,7 +169,7 @@ public class ImageView extends JFrame {
 
                     isPainting = false;
                     setCursor(Cursor.getDefaultCursor());
-                }
+                     }
             }
         });
 
@@ -198,176 +199,6 @@ public class ImageView extends JFrame {
         });
 
         addMouseListeners();
-
-        // Raccourcis clavier
-        KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
-        KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
-        KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
-        KeyStroke pickColorKeyStroke = KeyStroke.getKeyStroke("control I");
-        KeyStroke rotateLeftKeyStroke = KeyStroke.getKeyStroke("control LEFT");
-        KeyStroke rotateRightKeyStroke = KeyStroke.getKeyStroke("control RIGHT");
-        KeyStroke rotateCustomKeyStroke = KeyStroke.getKeyStroke("control R");
-        KeyStroke flipHorizontalKeyStroke = KeyStroke.getKeyStroke("control UP");
-        KeyStroke flipVerticalKeyStroke = KeyStroke.getKeyStroke("control DOWN");
-        KeyStroke brightenPlusKeyStroke = KeyStroke.getKeyStroke("control ADD");
-        KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
-        KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
-        KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
-        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control D");
-        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control C");
-
-        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
-        openItem.getActionMap().put("open", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleOpenImage(e);
-            }
-        });
-
-        saveItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(saveKeyStroke, "save");
-        saveItem.getActionMap().put("save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSaveImage(e);
-            }
-        });
-
-        paintBucketItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(paintBucketKeyStroke, "paintBucket");
-        paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageView.this.togglePaintBucket(e);
-            }
-        });
-
-        pickColorItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pickColorKeyStroke, "pickColor");
-        pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImageView.this.togglePickColor(e);
-            }
-        });
-
-        rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
-        rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.rotate(false);
-                }
-            }
-        });
-
-        rotateRightItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateRightKeyStroke, "rotateRight");
-        rotateRightItem.getActionMap().put("rotateRight", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.rotate(true);
-                }
-            }
-        });
-
-        rotateCustomItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateCustomKeyStroke, "rotateCustom");
-        rotateCustomItem.getActionMap().put("rotateCustom", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    String angleStr = JOptionPane.showInputDialog(ImageView.this, "Enter rotation angle (degrees):",
-                            "Rotate Custom",
-                            JOptionPane.PLAIN_MESSAGE);
-                    try {
-                        int angle = Integer.parseInt(angleStr);
-                        controller.rotateImageByAngle(angle);
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(ImageView.this, "Invalid input! Please enter a numeric value.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke,
-                "flipHorizontal");
-        flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.flipImage(true);
-                }
-            }
-        });
-
-        flipVerticalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipVerticalKeyStroke, "flipVertical");
-        flipVerticalItem.getActionMap().put("flipVertical", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.flipImage(false);
-                }
-            }
-        });
-
-        brightenPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenPlusKeyStroke, "brightenPlus");
-        brightenPlusItem.getActionMap().put("brightenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustBrightness(10);
-                }
-            }
-        });
-
-        brightenMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenMoinKeyStroke, "brightenMoin");
-        brightenMinusItem.getActionMap().put("brightenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustBrightness(-10);
-                }
-            }
-        });
-
-        contrastPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenPlusKeyStroke, "darkenPlus");
-        contrastPlusItem.getActionMap().put("darkenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustContrast(10);
-                }
-            }
-        });
-
-        contrastMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenMoinKeyStroke, "darkenMoin");
-        contrastMinusItem.getActionMap().put("darkenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.adjustContrast(-10);
-                }
-            }
-        });
-
-        drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
-        drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    toggleIsDrawingRectangle();
-                }
-            }
-        });
-
-        drawCircleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawCircleKeyStroke, "drawCircle");
-        drawCircleItem.getActionMap().put("drawCircle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    toggleIsDrawingCircle();
-                }
-            }
-        });
 
         this.setVisible(true);
 
@@ -453,10 +284,11 @@ public class ImageView extends JFrame {
         if (this.image == null) {
 			this.image = image;
 			this.originalImage = deepCopy(image);
-			this.imageTemp = deepCopy(image);
-		} else {
-			this.imageTemp = image;
-		}
+			
+		} 
+        this.imageTemp = deepCopy(image);
+        imageLabel.setIcon(new ImageIcon(imageTemp));
+
 		imageLabel.repaint();
     }
 
@@ -596,7 +428,7 @@ public class ImageView extends JFrame {
 
 					// Restaurer les pixels de l'image originale avant le déplacement
 					if (shape != null) {
-						Point topLeft = convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
+						Point topLeft = controller.convertToImageCoordinates(selectedShape.getX(), selectedShape.getY());
 
 						int x1 = Math.max(0, topLeft.x);
 						int y1 = Math.max(0, topLeft.y);
@@ -616,7 +448,7 @@ public class ImageView extends JFrame {
 
 					// Dessiner l'image collée à la nouvelle position
 					if (imagePaste != null) {
-						Point newTopLeft = convertToImageCoordinates(newX, newY);
+						Point newTopLeft = controller.convertToImageCoordinates(newX, newY);
 
 						Graphics2D g2dDraw = imageTemp.createGraphics();
 						g2dDraw.drawImage(imagePaste, newTopLeft.x, newTopLeft.y, null);
@@ -656,7 +488,7 @@ public class ImageView extends JFrame {
             return;
         }
     
-        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+        Point topLeft = this.controller.convertToImageCoordinates(shape.getX(), shape.getY());
         int x1 = Math.max(0, topLeft.x);
         int y1 = Math.max(0, topLeft.y);
         int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
@@ -724,7 +556,7 @@ public class ImageView extends JFrame {
 
 			this.shape.moveTo(x, y);
 
-			Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+			Point topLeft = this.controller.convertToImageCoordinates(shape.getX(), shape.getY());
 			Graphics2D g2d = imageTemp.createGraphics();
 			g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
 			g2d.dispose();
