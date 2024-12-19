@@ -181,7 +181,7 @@ public class Menu extends JPanel {
 
 		// Slider de tolérance en pourcentage avec style FlatLaf
 		JLabel toleranceLabel = new JLabel("Tolérance:");
-		toleranceSlider = new JSlider(0, 255, 80);
+		toleranceSlider = new JSlider(0, 100, 20);
 		toleranceSlider.setUI(new FlatLafCustomSliderUI(toleranceSlider));
 		toleranceSlider.setMajorTickSpacing(20);
 		toleranceSlider.setMinorTickSpacing(5);
