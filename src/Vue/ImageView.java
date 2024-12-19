@@ -113,8 +113,7 @@ public class ImageView extends JFrame {
         add(menu, BorderLayout.NORTH);
 
         // Crée la palette de d'outils
-        ToolPalette toolPalette = new ToolPalette();
-
+        ToolPalette toolPalette = new ToolPalette(this);
         add(toolPalette, BorderLayout.WEST);
 
         // Event pour le seau de peinture
@@ -210,8 +209,7 @@ public class ImageView extends JFrame {
                 isPainting = false;
                 isPickingColor = false;
             } else {
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
+                setCustomCursor("Pipette");
                 isPickingColor = true;
             }
         }
@@ -224,18 +222,34 @@ public class ImageView extends JFrame {
                 isPainting = false;
                 isPickingColor = false;
             } else {
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
+                setCustomCursor("Seau de peinture");
                 isPainting = true;
             }
         }
     }
 
     public void toggleIsDrawingRectangle() {
+        if (controller != null) {
+            if (isDrawingCircle || isDrawingRectangle) {
+                setCursor(Cursor.getDefaultCursor());
+                this.isDrawingCircle = false;
+            } else {
+                Cursor customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(customCursor);            }
+        }
         this.isDrawingRectangle = !this.isDrawingRectangle;
     }
 
     public void toggleIsDrawingCircle() {
+        if (controller != null) {
+            if (isDrawingCircle || isDrawingRectangle) {
+                setCursor(Cursor.getDefaultCursor());
+                this.isDrawingRectangle = false;
+            } else {
+                Cursor customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(customCursor);
+            }
+        }
         this.isDrawingCircle = !this.isDrawingCircle;
 
     }
@@ -529,4 +543,43 @@ public class ImageView extends JFrame {
         imageLabel.repaint();
     }
 
+    // Méthode pour changer le curseur personnalisé
+    private void setCustomCursor(String toolName) {
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        String iconPath = "";
+
+        // Définir le chemin de l'icône en fonction de l'outil sélectionné
+        switch (toolName) {
+            case "Seau de peinture":
+                iconPath = "img/Cursors/bucket-cursor.png";
+                break;
+            case "Pipette":
+                iconPath = "img/Cursors/eyedrop-cursor.png";
+                break;
+            default:
+                this.setCursor(Cursor.getDefaultCursor());
+                return;
+        }
+
+        try {
+            // Charger l'image
+            Image cursorImage = toolkit.getImage(iconPath);
+
+            // Redimensionner l'image si nécessaire
+            int cursorWidth = 32; // Largeur redimensionnée
+            int cursorHeight = 32; // Hauteur redimensionnée
+            Image scaledCursorImage = cursorImage.getScaledInstance(cursorWidth, cursorHeight, Image.SCALE_SMOOTH);
+
+            // Définir le point chaud (haut gauche de l'image)
+            Point hotSpot = new Point(0, 0);
+
+            // Créer et appliquer le curseur personnalisé
+            Cursor customCursor = toolkit.createCustomCursor(scaledCursorImage, hotSpot, toolName);
+            this.setCursor(customCursor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // En cas d'erreur, restaurer le curseur par défaut
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }
 }
