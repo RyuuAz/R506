@@ -23,14 +23,14 @@ public class Shape {
         this.renderText = renderText;
     }
 
-    public void draw(Graphics2D g2d) {
-        g2d.setColor(color);
-        if (isRectangle) {
-            g2d.drawRect(x, y, width, height);
-        } else {
-            g2d.drawOval(x, y, width, height);
-        }
-    }
+	public void draw(Graphics2D g2d) {
+		g2d.setColor(color);
+		if (isRectangle) {
+			g2d.drawRect(x, y, width, height);
+		} else {
+			g2d.drawOval(x, y, width, height);
+		}
+	}
 
     public boolean contains(int px, int py) {
         if (isRectangle) {
@@ -51,39 +51,39 @@ public class Shape {
         this.isSelected = isSelected;
     }
 
-    public void moveTo(int newX, int newY) {
-        x = newX;
-        y = newY;
-    }
+	public void moveTo(int newX, int newY) {
+		x = newX;
+		y = newY;
+	}
 
-    public void resize(int newWidth, int newHeight) {
-        width = newWidth;
-        height = newHeight;
-    }
+	public void resize(int newWidth, int newHeight) {
+		width = newWidth;
+		height = newHeight;
+	}
 
-    public int getX() {
-        return x;
-    }
+	public int getX() {
+		return x;
+	}
 
-    public void setX(int x) {
-        this.x = x;
-    }
+	public void setX(int x) {
+		this.x = x;
+	}
 
-    public int getY() {
-        return y;
-    }
+	public int getY() {
+		return y;
+	}
 
-    public void setY(int y) {
-        this.y = y;
-    }
+	public void setY(int y) {
+		this.y = y;
+	}
 
-    public int getWidth() {
-        return width;
-    }
+	public int getWidth() {
+		return width;
+	}
 
-    public int getHeight() {
-        return height;
-    }
+	public int getHeight() {
+		return height;
+	}
 
     public boolean isRectangle() {
         return isRectangle;

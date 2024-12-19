@@ -1,26 +1,15 @@
 package Vue;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
-import com.formdev.flatlaf.FlatDarkLaf;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-
 import Controller.ImageController;
 import Model.ImageModel;
-
-import java.awt.image.BufferedImage;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,12 +24,15 @@ public class ImageView extends JFrame {
     private Color pickedColor;
     private boolean isPainting, isRemoving, isDrawingRectangle, isDrawingCircle, isPasting, isPickingColor,
             isCopyingWithoutColor = false;
+    private boolean isPainting, isRemoving, isDrawingRectangle, isDrawingCircle, isPasting, isPickingColor,
+            isCopyingWithoutColor = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
     private Shape shape;
     private ArrayList<Shape> shapeTextes = new ArrayList<>();
 
+    private Shape currentShape, selectedShape = null; // Forme temporaire en cours de dessin
     private Shape currentShape, selectedShape = null; // Forme temporaire en cours de dessin
     private ArrayList<RenderText> renderTexts = new ArrayList<>();
     private Point lastMousePosition;
@@ -112,9 +104,11 @@ public class ImageView extends JFrame {
                         if (shapeTexte.isOver()) {
                             shapeTexte.draw(g2d);
                         }
-                        shapeTexte.getRenderText().draw(g2d, shapeTexte.getRenderText().getX(), shapeTexte.getRenderText().getY());
+                        shapeTexte.getRenderText().draw(g2d, shapeTexte.getRenderText().getX(),
+                                shapeTexte.getRenderText().getY());
                     }
                 }
+                
                 if (renderTexts.size() > 0) {
                     for (RenderText renderText : renderTexts) {
                         renderText.draw((Graphics2D) g);
@@ -140,8 +134,7 @@ public class ImageView extends JFrame {
         add(menu, BorderLayout.NORTH);
 
         // Crée la palette de d'outils
-        ToolPalette toolPalette = new ToolPalette();
-
+        ToolPalette toolPalette = new ToolPalette(this);
         add(toolPalette, BorderLayout.WEST);
 
         // Event pour le seau de peinture
@@ -236,8 +229,7 @@ public class ImageView extends JFrame {
                 isPainting = false;
                 isPickingColor = false;
             } else {
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
+                setCustomCursor("Pipette");
                 isPickingColor = true;
             }
         }
@@ -250,18 +242,35 @@ public class ImageView extends JFrame {
                 isPainting = false;
                 isPickingColor = false;
             } else {
-                Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-                setCursor(cursor);
+                setCustomCursor("Seau de peinture");
                 isPainting = true;
             }
         }
     }
 
     public void toggleIsDrawingRectangle() {
+        if (controller != null) {
+            if (isDrawingCircle || isDrawingRectangle) {
+                setCursor(Cursor.getDefaultCursor());
+                this.isDrawingCircle = false;
+            } else {
+                Cursor customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(customCursor);
+            }
+        }
         this.isDrawingRectangle = !this.isDrawingRectangle;
     }
 
     public void toggleIsDrawingCircle() {
+        if (controller != null) {
+            if (isDrawingCircle || isDrawingRectangle) {
+                setCursor(Cursor.getDefaultCursor());
+                this.isDrawingRectangle = false;
+            } else {
+                Cursor customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+                setCursor(customCursor);
+            }
+        }
         this.isDrawingCircle = !this.isDrawingCircle;
 
     }
@@ -333,7 +342,7 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
-                    
+
                 } else if (isDrawingRectangle || isDrawingCircle) {
                     clickX = e.getX();
                     clickY = e.getY();
@@ -560,7 +569,6 @@ public class ImageView extends JFrame {
             }
 
             if (isCopyingWithoutColor) {
-
                 for (int i = 0; i < copiedImage.getWidth(); i++) {
                     for (int j = 0; j < copiedImage.getHeight(); j++) {
                         int rgb = copiedImage.getRGB(i, j);
@@ -699,6 +707,45 @@ public class ImageView extends JFrame {
         imageLabel.repaint();
     }
 
+    // Méthode pour changer le curseur personnalisé
+    private void setCustomCursor(String toolName) {
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        String iconPath = "";
+
+        // Définir le chemin de l'icône en fonction de l'outil sélectionné
+        switch (toolName) {
+            case "Seau de peinture":
+                iconPath = "img/Cursors/bucket-cursor.png";
+                break;
+            case "Pipette":
+                iconPath = "img/Cursors/eyedrop-cursor.png";
+                break;
+            default:
+                this.setCursor(Cursor.getDefaultCursor());
+                return;
+        }
+
+        try {
+            // Charger l'image
+            Image cursorImage = toolkit.getImage(iconPath);
+
+            // Redimensionner l'image si nécessaire
+            int cursorWidth = 32; // Largeur redimensionnée
+            int cursorHeight = 32; // Hauteur redimensionnée
+            Image scaledCursorImage = cursorImage.getScaledInstance(cursorWidth, cursorHeight, Image.SCALE_SMOOTH);
+
+            // Définir le point chaud (haut gauche de l'image)
+            Point hotSpot = new Point(0, 0);
+
+            // Créer et appliquer le curseur personnalisé
+            Cursor customCursor = toolkit.createCustomCursor(scaledCursorImage, hotSpot, toolName);
+            this.setCursor(customCursor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // En cas d'erreur, restaurer le curseur par défaut
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }
     void addImage(BufferedImage image, int x, int y) {
         images.add(image);
         angles.add(0.0); // Angle initial

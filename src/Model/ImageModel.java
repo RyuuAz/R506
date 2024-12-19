@@ -6,6 +6,7 @@ import Controller.ImageController;
 import Vue.Shape;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,125 +16,125 @@ import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 
 public class ImageModel {
-    private ImageController controller;
+	private ImageController controller;
 
-    public ImageModel(ImageController controller) {
-        this.controller = controller;
-    }
+	public ImageModel(ImageController controller) {
+		this.controller = controller;
+	}
 
-    public BufferedImage loadImageFromFile(File file) throws IOException {
-        BufferedImage image = readImageFromFile(file);
-        return image;
-    }
+	public BufferedImage loadImageFromFile(File file) throws IOException {
+		BufferedImage image = readImageFromFile(file);
+		return image;
+	}
 
-    private BufferedImage readImageFromFile(File file) throws IOException {
-        return ImageIO.read(file);
-    }
+	private BufferedImage readImageFromFile(File file) throws IOException {
+		return ImageIO.read(file);
+	}
 
-    public void saveImageToFile(BufferedImage image, File file, String format) throws IOException {
-        if (image != null) {
-            ImageIO.write(image, format, file);
-        }
-    }
+	public void saveImageToFile(BufferedImage image, File file, String format) throws IOException {
+		if (image != null) {
+			ImageIO.write(image, format, file);
+		}
+	}
 
-    public Point convertToImageCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
-        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
-        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
-        int imageX = x - offsetX;
-        int imageY = y - offsetY;
-        return new Point(imageX, imageY);
-    }
+	public Point convertToImageCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
+		int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+		int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+		int imageX = x - offsetX;
+		int imageY = y - offsetY;
+		return new Point(imageX, imageY);
+	}
 
-    public Point convertToLabelCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
-        int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
-        int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
-        int labelX = x + offsetX;
-        int labelY = y + offsetY;
-        return new Point(labelX, labelY);
-    }
+	public Point convertToLabelCoordinates(int x, int y, JLabel imageLabel, BufferedImage imageTemp) {
+		int offsetX = (imageLabel.getWidth() - imageTemp.getWidth()) / 2;
+		int offsetY = (imageLabel.getHeight() - imageTemp.getHeight()) / 2;
+		int labelX = x + offsetX;
+		int labelY = y + offsetY;
+		return new Point(labelX, labelY);
+	}
 
-    public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color newColor, int tolerance, Shape shape,
-            JLabel imageLabel) {
-        if (image == null)
-            return null;
+	public BufferedImage applyPaintBucket(BufferedImage image, int x, int y, Color newColor, int tolerance, Shape shape,
+			JLabel imageLabel) {
+		if (image == null)
+			return null;
 
-        int targetColor = image.getRGB(x, y);
+		int targetColor = image.getRGB(x, y);
 
-        if (shape == null)
-            return floodFill(image, x, y, targetColor, newColor.getRGB(), tolerance);
-        else
-            return floodFillShape(image, x, y, targetColor, newColor.getRGB(), tolerance, shape, imageLabel);
-    }
+		if (shape == null)
+			return floodFill(image, x, y, targetColor, newColor.getRGB(), tolerance);
+		else
+			return floodFillShape(image, x, y, targetColor, newColor.getRGB(), tolerance, shape, imageLabel);
+	}
 
-    public BufferedImage floodFill(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance) {
-        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        Queue<Point> queue = new LinkedList<>();
-        queue.add(new Point(x, y));
+	public BufferedImage floodFill(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance) {
+		boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+		Queue<Point> queue = new LinkedList<>();
+		queue.add(new Point(x, y));
 
-        while (!queue.isEmpty()) {
-            Point p = queue.poll();
-            int px = p.x;
-            int py = p.y;
+		while (!queue.isEmpty()) {
+			Point p = queue.poll();
+			int px = p.x;
+			int py = p.y;
 
-            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
-                continue;
-            if (visited[px][py])
-                continue;
+			if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+				continue;
+			if (visited[px][py])
+				continue;
 
-            int currentColor = image.getRGB(px, py);
-            if (!isWithinTolerance(targetColor, currentColor, tolerance))
-                continue;
+			int currentColor = image.getRGB(px, py);
+			if (!isWithinTolerance(targetColor, currentColor, tolerance))
+				continue;
 
-            image.setRGB(px, py, newColor);
-            visited[px][py] = true;
+			image.setRGB(px, py, newColor);
+			visited[px][py] = true;
 
-            queue.add(new Point(px + 1, py));
-            queue.add(new Point(px - 1, py));
-            queue.add(new Point(px, py + 1));
-            queue.add(new Point(px, py - 1));
-        }
+			queue.add(new Point(px + 1, py));
+			queue.add(new Point(px - 1, py));
+			queue.add(new Point(px, py + 1));
+			queue.add(new Point(px, py - 1));
+		}
 
-        return image;
-    }
+		return image;
+	}
 
-    public BufferedImage floodFillShape(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance,
-            Shape shape, JLabel imageLabel) {
-        if (targetColor == newColor)
-            return null; // Pas besoin de remplir si la couleur cible est identique
+	public BufferedImage floodFillShape(BufferedImage image, int x, int y, int targetColor, int newColor, int tolerance,
+			Shape shape, JLabel imageLabel) {
+		if (targetColor == newColor)
+			return null; // Pas besoin de remplir si la couleur cible est identique
 
-        boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
-        Queue<Point> queue = new LinkedList<>();
-        queue.add(new Point(x, y));
+		boolean[][] visited = new boolean[image.getWidth()][image.getHeight()];
+		Queue<Point> queue = new LinkedList<>();
+		queue.add(new Point(x, y));
 
-        while (!queue.isEmpty()) {
-            Point p = queue.poll();
-            int px = p.x;
-            int py = p.y;
+		while (!queue.isEmpty()) {
+			Point p = queue.poll();
+			int px = p.x;
+			int py = p.y;
 
-            if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
-                continue;
-            if (visited[px][py])
-                continue;
+			if (px < 0 || py < 0 || px >= image.getWidth() || py >= image.getHeight())
+				continue;
+			if (visited[px][py])
+				continue;
 
-            int currentColor = image.getRGB(px, py);
-            if (!isWithinTolerance(targetColor, currentColor, tolerance))
-                continue;
+			int currentColor = image.getRGB(px, py);
+			if (!isWithinTolerance(targetColor, currentColor, tolerance))
+				continue;
 
-            Point tmpPoint = convertToLabelCoordinates(px, py, imageLabel, image);
+			Point tmpPoint = convertToLabelCoordinates(px, py, imageLabel, image);
 
-            if (shape.contains(tmpPoint.x, tmpPoint.y)) {
-                image.setRGB(px, py, newColor);
-                visited[px][py] = true;
+			if (shape.contains(tmpPoint.x, tmpPoint.y)) {
+				image.setRGB(px, py, newColor);
+				visited[px][py] = true;
 
-                queue.add(new Point(px + 1, py));
-                queue.add(new Point(px - 1, py));
-                queue.add(new Point(px, py + 1));
-                queue.add(new Point(px, py - 1));
-            }
-        }
+				queue.add(new Point(px + 1, py));
+				queue.add(new Point(px - 1, py));
+				queue.add(new Point(px, py + 1));
+				queue.add(new Point(px, py - 1));
+			}
+		}
 
-        return image;
-    }
+		return image;
+	}
 
     public boolean isWithinTolerance(int color1, int color2, int tolerance) {
         int r1 = (color1 >> 16) & 0xFF;
@@ -206,60 +207,60 @@ public class ImageModel {
 
     }
 
-    public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-        BufferedImage flippedImage = new BufferedImage(width, height, image.getType());
+	public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		BufferedImage flippedImage = new BufferedImage(width, height, image.getType());
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int xNew = horizontal ? width - x - 1 : x;
-                int yNew = horizontal ? y : height - y - 1;
-                flippedImage.setRGB(xNew, yNew, image.getRGB(x, y));
-            }
-        }
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int xNew = horizontal ? width - x - 1 : x;
+				int yNew = horizontal ? y : height - y - 1;
+				flippedImage.setRGB(xNew, yNew, image.getRGB(x, y));
+			}
+		}
 
-        return flippedImage;
-    }
+		return flippedImage;
+	}
 
-    // Ajuster la luminosité pixel par pixel
-    public BufferedImage adjustBrightness(BufferedImage image, int value) {
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-                Color c = new Color(image.getRGB(x, y));
+	// Ajuster la luminosité pixel par pixel
+	public BufferedImage adjustBrightness(BufferedImage image, int value) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				Color c = new Color(image.getRGB(x, y));
 
-                // Récupérer les valeurs des composants RGB
-                int red = c.getRed() + value;
-                int green = c.getGreen() + value;
-                int blue = c.getBlue() + value;
+				// Récupérer les valeurs des composants RGB
+				int red = c.getRed() + value;
+				int green = c.getGreen() + value;
+				int blue = c.getBlue() + value;
 
-                // Limiter les valeurs pour éviter un dépassement des bornes
-                red = clamp(red);
-                green = clamp(green);
-                blue = clamp(blue);
+				// Limiter les valeurs pour éviter un dépassement des bornes
+				red = clamp(red);
+				green = clamp(green);
+				blue = clamp(blue);
 
-                // Appliquer la nouvelle couleur
-                image.setRGB(x, y, new Color(red, green, blue).getRGB());
-            }
-        }
-        return image;
-    }
+				// Appliquer la nouvelle couleur
+				image.setRGB(x, y, new Color(red, green, blue).getRGB());
+			}
+		}
+		return image;
+	}
 
-    // Ajuster le contraste pixel par pixel
-    public BufferedImage adjustContrast(BufferedImage image, int value) {
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-                Color c = new Color(image.getRGB(x, y));
+	// Ajuster le contraste pixel par pixel
+	public BufferedImage adjustContrast(BufferedImage image, int value) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				Color c = new Color(image.getRGB(x, y));
 
-                // Récupérer les valeurs des composants RGB
-                int red = (int) (c.getRed() + value / 100.0 * (c.getRed() - 127));
-                int green = (int) (c.getGreen() + value / 100.0 * (c.getGreen() - 127));
-                int blue = (int) (c.getBlue() + value / 100.0 * (c.getBlue() - 127));
+				// Récupérer les valeurs des composants RGB
+				int red = (int) (c.getRed() + value / 100.0 * (c.getRed() - 127));
+				int green = (int) (c.getGreen() + value / 100.0 * (c.getGreen() - 127));
+				int blue = (int) (c.getBlue() + value / 100.0 * (c.getBlue() - 127));
 
-                // Limiter les valeurs pour éviter un dépassement des bornes
-                red = clamp(red);
-                green = clamp(green);
-                blue = clamp(blue);
+				// Limiter les valeurs pour éviter un dépassement des bornes
+				red = clamp(red);
+				green = clamp(green);
+				blue = clamp(blue);
 
                 // Appliquer la nouvelle couleur
                 image.setRGB(x, y, new Color(red, green, blue).getRGB());
@@ -279,8 +280,8 @@ public class ImageModel {
         return metrics.stringWidth(text);
     }
 
-    // Méthode pour limiter la valeur entre 0 et 255
-    private int clamp(int value) {
-        return Math.min(Math.max(value, 0), 255);
-    }
+	// Méthode pour limiter la valeur entre 0 et 255
+	private int clamp(int value) {
+		return Math.min(Math.max(value, 0), 255);
+	}
 }

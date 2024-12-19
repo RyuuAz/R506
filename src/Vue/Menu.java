@@ -25,6 +25,7 @@ import java.awt.Component;
 import java.awt.RenderingHints.Key;
 import java.awt.TexturePaint;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 
 import java.awt.event.*;
@@ -33,23 +34,23 @@ import Controller.ImageController;
 
 public class Menu extends JPanel {
 
-    private JPanel colorDisplayPanel;
-    private ImageController controller;
-    private ImageView view;
-    private JSlider toleranceSlider;
+	private JPanel colorDisplayPanel;
+	private ImageController controller;
+	private ImageView view;
+	private JSlider toleranceSlider;
 
-    // Constructeur pour initialiser le menu
-    public Menu(ImageController controller, ImageView view) {
+	// Constructeur pour initialiser le menu
+	public Menu(ImageController controller, ImageView view) {
 
-        this.controller = controller;
-        this.view = view;
+		this.controller = controller;
+		this.view = view;
 
-        // Créer un panneau pour afficher l'image
-        this.setLayout(new FlowLayout(FlowLayout.LEFT));
+		// Créer un panneau pour afficher l'image
+		this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        // Créer la barre de menus avec FlatLaf
-        FlatLightLaf.setup(); // Setup FlatLaf Light theme
-        JMenuBar menuBar = new JMenuBar();
+		// Créer la barre de menus avec FlatLaf
+		FlatLightLaf.setup(); // Setup FlatLaf Light theme
+		JMenuBar menuBar = new JMenuBar();
 
         // Menu Fichier
         JMenu fileMenu = new JMenu("Fichier");
@@ -64,8 +65,8 @@ public class Menu extends JPanel {
         fileMenu.add(openItem);
         fileMenu.add(saveItem);
 
-        // Menu Édition
-        JMenu editMenu = new JMenu("Édition");
+		// Menu Édition
+		JMenu editMenu = new JMenu("Édition");
 
         // Sous-menu Transformation
         JMenu transformMenu = new JMenu("Transformation");
@@ -162,37 +163,37 @@ public class Menu extends JPanel {
         editMenu.addSeparator();
         editMenu.add(textMenu);
 
-        // Ajouter les menus à la barre de menus
-        menuBar.add(fileMenu);
-        menuBar.add(editMenu);
+		// Ajouter les menus à la barre de menus
+		menuBar.add(fileMenu);
+		menuBar.add(editMenu);
 
-        // Ajouter la barre de menus à la fenêtre
-        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        if (frame != null) {
-            frame.setJMenuBar(menuBar);
-        }
+		// Ajouter la barre de menus à la fenêtre
+		JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+		if (frame != null) {
+			frame.setJMenuBar(menuBar);
+		}
 
-        // Créer la barre d'outils (JToolBar)
-        JToolBar toolBar = new JToolBar();
-        toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
+		// Créer la barre d'outils (JToolBar)
+		JToolBar toolBar = new JToolBar();
+		toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
-        // Slider de tolérance en pourcentage avec style FlatLaf
-        JLabel toleranceLabel = new JLabel("Tolérance:");
-        toleranceSlider = new JSlider(0, 100, 20);
-        toleranceSlider.setUI(new FlatLafCustomSliderUI(toleranceSlider));
-        toleranceSlider.setMajorTickSpacing(20);
-        toleranceSlider.setMinorTickSpacing(5);
-        toleranceSlider.setPaintTicks(true);
-        toleranceSlider.setPaintLabels(true);
+		// Slider de tolérance en pourcentage avec style FlatLaf
+		JLabel toleranceLabel = new JLabel("Tolérance:");
+		toleranceSlider = new JSlider(0, 100, 20);
+		toleranceSlider.setUI(new FlatLafCustomSliderUI(toleranceSlider));
+		toleranceSlider.setMajorTickSpacing(20);
+		toleranceSlider.setMinorTickSpacing(5);
+		toleranceSlider.setPaintTicks(true);
+		toleranceSlider.setPaintLabels(true);
 
-        toolBar.add(toleranceLabel);
-        toolBar.add(toleranceSlider);
+		toolBar.add(toleranceLabel);
+		toolBar.add(toleranceSlider);
 
-        // Picker la couleur sélectionnée
-        colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(30, 30));
-        colorDisplayPanel.setBackground(Color.BLACK);
-        colorDisplayPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		// Picker la couleur sélectionnée
+		colorDisplayPanel = new JPanel();
+		colorDisplayPanel.setPreferredSize(new Dimension(30, 30));
+		colorDisplayPanel.setBackground(Color.BLACK);
+		colorDisplayPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         colorDisplayPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -206,24 +207,65 @@ public class Menu extends JPanel {
             }
         });
 
-        toolBar.add(colorDisplayPanel);
+		toolBar.add(colorDisplayPanel);
 
-        // Ajouter des boutons à la barre d'outils
-        JButton copierButton = new JButton("Copier");
-        JButton copierSansFButton = new JButton("Copier sans fond");
-        JButton couperButton = new JButton("Couper");
-        JButton collerButton = new JButton("Coller");
+		int iconSize = 20;
 
-        toolBar.add(copierButton);
-        toolBar.add(couperButton);
-        toolBar.add(collerButton);
+		// Ajouter des boutons à la barre d'outils et leur icones
+		JButton copierButton = new JButton("Copier");
+		ImageIcon copierIcon = new ImageIcon("img/ToolPalette/copy.png");
 
-        // Ajouter la barre de menus et la barre d'outils au topPanel
-        this.add(menuBar);
-        this.add(toolBar);
+		// Redimensionner l'icône
+		Image copierImage = copierIcon.getImage();
+		Image newCopierImage = copierImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
+		copierIcon = new ImageIcon(newCopierImage);
 
-        openItem.addActionListener(this::handleOpenImage);
-        saveItem.addActionListener(this::handleSaveImage);
+		copierButton.setIcon(copierIcon);
+
+		JButton copierSansFButton = new JButton("Copier sans fond");
+		ImageIcon copierSansFIcon = new ImageIcon("img/ToolPalette/copy_without_background.png");
+
+		// Redimensionner l'icône
+		Image copierSansFImage = copierSansFIcon.getImage();
+		Image newCopierSansFImage = copierSansFImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
+		copierSansFIcon = new ImageIcon(newCopierSansFImage);
+
+		copierSansFButton.setIcon(copierSansFIcon);
+
+		JButton collerButton = new JButton("Coller");
+		ImageIcon collerIcon = new ImageIcon("img/ToolPalette/paste.png");
+
+		// Redimensionner l'icône
+		Image collerImage = collerIcon.getImage();
+		Image newCollerImage = collerImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
+		collerIcon = new ImageIcon(newCollerImage);
+
+		collerButton.setIcon(collerIcon);
+
+		toolBar.add(copierButton);
+		toolBar.add(copierSansFButton);
+		toolBar.add(collerButton);
+
+		// Ajouter des séparateurs entre les groupes d'outils
+		toolBar.addSeparator();
+
+		JButton removeColorButton = new JButton("Supprimer la couleur");
+		ImageIcon removeColorIcon = new ImageIcon("img/ToolPalette/remove_color.png");
+
+		// Redimensionner l'icône
+		Image removeColorImage = removeColorIcon.getImage();
+		Image newRemoveColorImage = removeColorImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
+		removeColorIcon = new ImageIcon(newRemoveColorImage);
+		removeColorButton.setIcon(removeColorIcon);
+
+		toolBar.add(removeColorButton);
+
+		// Ajouter la barre de menus et la barre d'outils au topPanel
+		this.add(menuBar);
+		this.add(toolBar);
+
+		openItem.addActionListener(this::handleOpenImage);
+		saveItem.addActionListener(this::handleSaveImage);
 
         addTextItem.addActionListener(e -> {
             if (controller != null) {
@@ -272,11 +314,14 @@ public class Menu extends JPanel {
         paintBucketItem.addActionListener(e -> {
             view.togglePaintBucket(e);
         });
+		paintBucketItem.addActionListener(e -> {
+			view.togglePaintBucket(e);
+		});
 
-        // ActionListener pour la pipette
-        pickColorItem.addActionListener(e -> {
-            view.togglePickColor(e);
-        });
+		// ActionListener pour la pipette
+		pickColorItem.addActionListener(e -> {
+			view.togglePickColor(e);
+		});
 
         rotateLeftItem.addActionListener(e -> {
             if (controller != null) {
@@ -345,29 +390,35 @@ public class Menu extends JPanel {
             }
         });
 
-        copierButton.addActionListener(e -> {
-            if (controller != null) {
-                view.copyImage();
-            }
-        });
+		copierButton.addActionListener(e -> {
+			if (controller != null) {
+				view.copyImage();
+			}
+		});
 
-        collerButton.addActionListener(e -> {
-            if (controller != null) {
-                controller.pasteImage(view);
-            }
-        });
+		collerButton.addActionListener(e -> {
+			if (controller != null) {
+				controller.pasteImage(view);
+			}
+		});
 
-        drawRectangleItem.addActionListener(e -> {
-            if (controller != null) {
-                view.toggleIsDrawingRectangle();
-            }
-        });
+		removeColorButton.addActionListener(e -> {
+			if (controller != null) {
+				//view.updateImage(view.removeColorFromImage(view.getImageTemp()), true);
+			}
+		});
 
-        drawCircleItem.addActionListener(e -> {
-            if (controller != null) {
-                view.toggleIsDrawingCircle();
-            }
-        });
+		drawRectangleItem.addActionListener(e -> {
+			if (controller != null) {
+				view.toggleIsDrawingRectangle();
+			}
+		});
+
+		drawCircleItem.addActionListener(e -> {
+			if (controller != null) {
+				view.toggleIsDrawingCircle();
+			}
+		});
 
         // Raccourcis clavier
         KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
@@ -399,37 +450,37 @@ public class Menu extends JPanel {
             }
         });
 
-        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
-        openItem.getActionMap().put("open", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleOpenImage(e);
-            }
-        });
+		openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
+		openItem.getActionMap().put("open", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handleOpenImage(e);
+			}
+		});
 
-        saveItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(saveKeyStroke, "save");
-        saveItem.getActionMap().put("save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSaveImage(e);
-            }
-        });
+		saveItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(saveKeyStroke, "save");
+		saveItem.getActionMap().put("save", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handleSaveImage(e);
+			}
+		});
 
-        paintBucketItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(paintBucketKeyStroke, "paintBucket");
-        paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                view.togglePaintBucket(e);
-            }
-        });
+		paintBucketItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(paintBucketKeyStroke, "paintBucket");
+		paintBucketItem.getActionMap().put("paintBucket", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.togglePaintBucket(e);
+			}
+		});
 
-        pickColorItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pickColorKeyStroke, "pickColor");
-        pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                view.togglePickColor(e);
-            }
-        });
+		pickColorItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pickColorKeyStroke, "pickColor");
+		pickColorItem.getActionMap().put("pickColor", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.togglePickColor(e);
+			}
+		});
 
         rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
         rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
@@ -534,56 +585,55 @@ public class Menu extends JPanel {
             }
         });
 
-        drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
-        drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.toggleIsDrawingRectangle();
-                }
-            }
-        });
+		drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
+		drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.toggleIsDrawingRectangle();
+				}
+			}
+		});
 
-        drawCircleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawCircleKeyStroke, "drawCircle");
-        drawCircleItem.getActionMap().put("drawCircle", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.toggleIsDrawingCircle();
-                }
-            }
-        });
+		drawCircleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawCircleKeyStroke, "drawCircle");
+		drawCircleItem.getActionMap().put("drawCircle", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.toggleIsDrawingCircle();
+				}
+			}
+		});
 
-        copierButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyKeyStroke, "copy");
-        copierButton.getActionMap().put("copy", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.copyImage();
-                }
-            }
-        });
+		copierButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyKeyStroke, "copy");
+		copierButton.getActionMap().put("copy", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.copyImage();
+				}
+			}
+		});
 
-        copierSansFButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyWithoutBackgroundKeyStroke,
-                "copyWithoutBackground");
-        copierSansFButton.getActionMap().put("copyWithoutBackground", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    // view.copyImageWithoutBackground();
-                }
-            }
-        });
+		copierSansFButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyWithoutBackgroundKeyStroke, "copyWithoutBackground");
+		copierSansFButton.getActionMap().put("copyWithoutBackground", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					//view.copyImageWithoutBackground();
+				}
+			}
+		});
 
-        collerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pasteKeyStroke, "paste");
-        collerButton.getActionMap().put("paste", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    controller.pasteImage(view);
-                }
-            }
-        });
+		collerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pasteKeyStroke, "paste");
+		collerButton.getActionMap().put("paste", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					controller.pasteImage(view);
+				}
+			}
+		});
 
     }
 
@@ -597,107 +647,99 @@ public class Menu extends JPanel {
         
     }
 
-    private void handleOpenImage(ActionEvent e) {
-        if (controller != null) {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                    "Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
-            fileChooser.setFileFilter(imageFilter);
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                controller.openImage(fileChooser.getSelectedFile());
-            }
-        }
-    }
+	private void handleOpenImage(ActionEvent e) {
+		if (controller != null) {
+			JFileChooser fileChooser = new JFileChooser();
+			FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+					"Images", "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp");
+			fileChooser.setFileFilter(imageFilter);
+			int result = fileChooser.showOpenDialog(this);
+			if (result == JFileChooser.APPROVE_OPTION) {
+				controller.openImage(fileChooser.getSelectedFile());
+			}
+		}
+	}
 
-    private void handleSaveImage(ActionEvent e) {
-        if (controller != null) {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                    "Images", "png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp");
-            fileChooser.setFileFilter(imageFilter);
-            fileChooser.setSelectedFile(new java.io.File("image.png")); // Default file name with .png extension
-            int result = fileChooser.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                controller.saveImage(view.getImageTemp(), fileChooser.getSelectedFile());
-            }
-        }
-    }
+	private void handleSaveImage(ActionEvent e) {
+		if (controller != null) {
+			JFileChooser fileChooser = new JFileChooser();
+			FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+					"Images", "png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp");
+			fileChooser.setFileFilter(imageFilter);
+			fileChooser.setSelectedFile(new java.io.File("image.png")); // Default file name with .png extension
+			int result = fileChooser.showSaveDialog(this);
+			if (result == JFileChooser.APPROVE_OPTION) {
+				controller.saveImage(view.getImageTemp(), fileChooser.getSelectedFile());
+			}
+		}
+	}
 
-    public int getSliderValue() {
-        return toleranceSlider.getValue();
-    }
+	public int getSliderValue() {
+		return toleranceSlider.getValue();
+	}
 
-    public JPanel getColorDisplayPanel() {
-        return colorDisplayPanel;
-    }
+	public JPanel getColorDisplayPanel() {
+		return colorDisplayPanel;
+	}
 
-    public void setColorDisplayPanelColor(Color color) {
-        colorDisplayPanel.setBackground(color);
-    }
+	public void setColorDisplayPanelColor(Color color) {
+		colorDisplayPanel.setBackground(color);
+	}
 
-    // Classe personnalisée pour styliser le JSlider avec FlatLaf
-    private static class FlatLafCustomSliderUI extends BasicSliderUI {
-        public FlatLafCustomSliderUI(JSlider slider) {
-            super(slider);
-            slider.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (slider.isEnabled()) {
-                        int value = valueForXPosition(e.getX());
-                        slider.setValue(value);
-                    }
-                }
+	// Classe personnalisée pour styliser le JSlider avec FlatLaf
+	private static class FlatLafCustomSliderUI extends BasicSliderUI {
+		public FlatLafCustomSliderUI(JSlider slider) {
+			super(slider);
+			slider.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent e) {
+					if (slider.isEnabled()) {
+						int value = valueForXPosition(e.getX());
+						slider.setValue(value);
+					}
+				}
+			});
+		}
 
-                public void mouseDragged(MouseEvent e) {
-                    if (slider.isEnabled()) {
-                        int value = valueForXPosition(e.getX());
-                        slider.setValue(value);
-                        slider.repaint();
-                    }
-                }
-            });
-        }
+		@Override
+		public void paintTrack(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        @Override
-        public void paintTrack(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			int trackHeight = 8;
+			int trackY = trackRect.y + (trackRect.height - trackHeight) / 2;
+			g2d.setColor(Color.LIGHT_GRAY);
+			g2d.fillRect(trackRect.x, trackY, trackRect.width, trackHeight);
 
-            int trackHeight = 8;
-            int trackY = trackRect.y + (trackRect.height - trackHeight) / 2;
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.fillRect(trackRect.x, trackY, trackRect.width, trackHeight);
+			int fillWidth = (int) ((slider.getValue() / 100.0) * trackRect.width);
+			g2d.setColor(new Color(0, 120, 215)); // Blue color similar to Paint.NET
+			g2d.fillRect(trackRect.x, trackY, fillWidth, trackHeight);
+		}
 
-            int fillWidth = (int) ((slider.getValue() / 100.0) * trackRect.width);
-            g2d.setColor(new Color(0, 120, 215)); // Blue color similar to Paint.NET
-            g2d.fillRect(trackRect.x, trackY, fillWidth, trackHeight);
-        }
+		@Override
+		public void paintThumb(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        @Override
-        public void paintThumb(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			int thumbWidth = 16;
+			int thumbHeight = 16;
+			int thumbX = thumbRect.x + (thumbRect.width - thumbWidth) / 2;
+			int thumbY = thumbRect.y + (thumbRect.height - thumbHeight) / 2;
 
-            int thumbWidth = 16;
-            int thumbHeight = 16;
-            int thumbX = thumbRect.x + (thumbRect.width - thumbWidth) / 2;
-            int thumbY = thumbRect.y + (thumbRect.height - thumbHeight) / 2;
+			g2d.setColor(Color.WHITE);
+			g2d.fillOval(thumbX, thumbY, thumbWidth, thumbHeight);
+			g2d.setColor(Color.DARK_GRAY);
+			g2d.drawOval(thumbX, thumbY, thumbWidth, thumbHeight);
+		}
 
-            g2d.setColor(Color.WHITE);
-            g2d.fillOval(thumbX, thumbY, thumbWidth, thumbHeight);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawOval(thumbX, thumbY, thumbWidth, thumbHeight);
-        }
+		@Override
+		public void paintTicks(Graphics g) {
+			super.paintTicks(g); // Garder l'affichage des ticks
+		}
 
-        @Override
-        public void paintTicks(Graphics g) {
-            super.paintTicks(g); // Garder l'affichage des ticks
-        }
-
-        @Override
-        public void paintLabels(Graphics g) {
-            super.paintLabels(g); // Garder l'affichage des labels
-        }
-    }
+		@Override
+		public void paintLabels(Graphics g) {
+			super.paintLabels(g); // Garder l'affichage des labels
+		}
+	}
 }
