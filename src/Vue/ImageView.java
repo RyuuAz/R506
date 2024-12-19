@@ -1,30 +1,15 @@
 package Vue;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
-import com.formdev.flatlaf.FlatDarkLaf;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-
 import Controller.ImageController;
 import Model.ImageModel;
-
-import java.awt.image.BufferedImage;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
-
-import Controller.ImageController;
-import Model.ImageModel;
+import java.util.ArrayList;
+import javax.swing.*;
 
 public class ImageView extends JFrame {
 

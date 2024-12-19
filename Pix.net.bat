@@ -12,6 +12,6 @@ REM Compiler tous les fichiers Java et placer les fichiers .class dans leurs ré
 javac -d bin -cp "lib\*;src" src\Controller\*.java src\Vue\*.java src\Model\*.java
 
 REM Exécuter la classe principale (Controller) à partir de bin\Controller
-java -cp "bin;%FLATLAF_JAR%" Controller.ImageController
+java -cp "bin;lib" Controller.ImageController
 
 pause
