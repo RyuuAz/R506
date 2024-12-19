@@ -15,12 +15,12 @@ import Model.ImageModel;
 public class ImageView extends JFrame {
 
     private JLabel imageLabel;
-    private JLabel affichJLabel;
     private ImageController controller;
     private ImageModel model;
     private Color pickedColor;
-    private boolean isPickingColor;
-    private boolean isPainting;
+    private boolean isPickingColor = false;
+    private boolean isPainting = false;
+    private boolean isRemoving = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
@@ -125,12 +125,8 @@ public class ImageView extends JFrame {
                     int x = evt.getX();
                     int y = evt.getY();
 
-                    System.out.println("x: " + x + " y: " + y);
-
                     int imageX = x - (labelWidth - imageWidth) / 2;
                     int imageY = y - (labelHeight - imageHeight) / 2;
-
-                    System.out.println("imageX: " + imageX + " imageY: " + imageY);
 
                     // Vérifiez si les coordonnées ajustées sont dans les limites de l'image
                     if (imageX >= 0 && imageX < image.getWidth() && imageY >= 0 && imageY < image.getHeight()) {
@@ -474,5 +470,9 @@ public class ImageView extends JFrame {
         }
         int rgb = image.getRGB(x, y);
         this.displayPickedColor(new Color(rgb));
+    }
+
+    public void setColor(Color color) {
+        this.pickedColor = color;
     }
 }

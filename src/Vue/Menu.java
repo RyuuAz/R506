@@ -3,6 +3,8 @@ package Vue;
 import javax.swing.*;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicSliderUI;
+
 import com.formdev.flatlaf.FlatLightLaf; // Import FlatLaf
 import com.formdev.flatlaf.FlatDarkLaf;
 
@@ -13,6 +15,9 @@ import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
+import java.awt.Graphics;
 
 import java.awt.event.*;
 
@@ -34,7 +39,8 @@ public class Menu extends JPanel {
         // Créer un panneau pour afficher l'image
         this.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        // Créer la barre de menus
+        // Créer la barre de menus avec FlatLaf
+        FlatLightLaf.setup(); // Setup FlatLaf Light theme
         JMenuBar menuBar = new JMenuBar();
 
         // Menu Fichier
@@ -65,15 +71,9 @@ public class Menu extends JPanel {
         JMenu colorMenu = new JMenu("Couleur");
         JMenuItem pickColorItem = new JMenuItem("Pipette de couleur");
         JMenuItem paintBucketItem = new JMenuItem("Seau de peinture");
-        colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
-        colorDisplayPanel.setBackground(Color.WHITE); // Couleur initiale (blanc)
-        JMenuItem colorDisplayItem = new JMenuItem("Couleur sélectionnée");
-        colorDisplayItem.setEnabled(false); // Non interactif
         colorMenu.add(pickColorItem);
         colorMenu.add(paintBucketItem);
         colorMenu.addSeparator();
-        colorMenu.add(colorDisplayItem);
         colorMenu.add(new JSeparator());
 
         // Sous-menu Luminosité/Contraste
@@ -116,34 +116,42 @@ public class Menu extends JPanel {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false); // Désactive la possibilité de faire flotter la barre d'outils
 
-        // Slider de tolerance
-        toleranceSlider = new JSlider(1, 255, 50);
-        toleranceSlider.setMajorTickSpacing(50);
-        toleranceSlider.setMinorTickSpacing(10);
+        // Slider de tolérance en pourcentage avec style FlatLaf
+        JLabel toleranceLabel = new JLabel("Tolérance:");
+        toleranceSlider = new JSlider(0, 100, 20);
+        toleranceSlider.setUI(new FlatLafCustomSliderUI(toleranceSlider));
+        toleranceSlider.setMajorTickSpacing(20);
+        toleranceSlider.setMinorTickSpacing(5);
         toleranceSlider.setPaintTicks(true);
         toleranceSlider.setPaintLabels(true);
+
+        toolBar.add(toleranceLabel);
         toolBar.add(toleranceSlider);
 
-        // Ajout d'une case couelur pour afficher la couleur selectionnée
+        // Picker la couleur sélectionnée
         colorDisplayPanel = new JPanel();
-        colorDisplayPanel.setPreferredSize(new Dimension(20, 20));
-        colorDisplayPanel.setBackground(Color.WHITE);
+        colorDisplayPanel.setPreferredSize(new Dimension(30, 30));
+        colorDisplayPanel.setBackground(Color.BLACK);
+        colorDisplayPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        colorDisplayPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            Color newColor = JColorChooser.showDialog(Menu.this, "Choisir une couleur", colorDisplayPanel.getBackground());
+            if (newColor != null) {
+                colorDisplayPanel.setBackground(newColor);
+                view.setColor(newColor);
+            }
+            }
+        });
+
         toolBar.add(colorDisplayPanel);
 
         // Ajouter des boutons à la barre d'outils
         JButton copierButton = new JButton("Copier");
+        JButton copierSansFButton = new JButton("Copier sans fond");
         JButton couperButton = new JButton("Couper");
         JButton collerButton = new JButton("Coller");
-
-        // Ajout d'un btn dark mode
-        JButton darkModeButton = new JButton("Dark Mode");
-        darkModeButton.addActionListener(e -> {
-            try {
-                UIManager.setLookAndFeel(new FlatDarkLaf());
-            } catch (UnsupportedLookAndFeelException ex) {
-                ex.printStackTrace();
-            }
-        });
 
         toolBar.add(copierButton);
         toolBar.add(couperButton);
@@ -267,8 +275,11 @@ public class Menu extends JPanel {
         KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
         KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
         KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
-        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control D");
-        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control C");
+        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control alt D");
+        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control alt C");
+        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke("control C");
+        KeyStroke copyWithoutBackgroundKeyStroke = KeyStroke.getKeyStroke("control shift C");
+        KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke("control V");
 
         openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
         openItem.getActionMap().put("open", new AbstractAction() {
@@ -422,6 +433,38 @@ public class Menu extends JPanel {
                 }
             }
         });
+
+        copierButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyKeyStroke, "copy");
+        copierButton.getActionMap().put("copy", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    view.copyImage();
+                }
+            }
+        });
+
+        copierSansFButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyWithoutBackgroundKeyStroke, "copyWithoutBackground");
+        copierSansFButton.getActionMap().put("copyWithoutBackground", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    //view.copyImageWithoutBackground();
+                }
+            }
+        });
+
+        collerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(pasteKeyStroke, "paste");
+        collerButton.getActionMap().put("paste", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (controller != null) {
+                    controller.pasteImage(view);
+                }
+            }
+        });
+
+        
     }
 
     private void handleOpenImage(ActionEvent e) {
@@ -461,5 +504,62 @@ public class Menu extends JPanel {
 
     public void setColorDisplayPanelColor(Color color) {
         colorDisplayPanel.setBackground(color);
+    }
+
+    // Classe personnalisée pour styliser le JSlider avec FlatLaf
+    private static class FlatLafCustomSliderUI extends BasicSliderUI {
+        public FlatLafCustomSliderUI(JSlider slider) {
+            super(slider);
+            slider.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (slider.isEnabled()) {
+                        int value = valueForXPosition(e.getX());
+                        slider.setValue(value);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void paintTrack(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int trackHeight = 8;
+            int trackY = trackRect.y + (trackRect.height - trackHeight) / 2;
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.fillRect(trackRect.x, trackY, trackRect.width, trackHeight);
+
+            int fillWidth = (int) ((slider.getValue() / 100.0) * trackRect.width);
+            g2d.setColor(new Color(0, 120, 215)); // Blue color similar to Paint.NET
+            g2d.fillRect(trackRect.x, trackY, fillWidth, trackHeight);
+        }
+
+        @Override
+        public void paintThumb(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int thumbWidth = 16;
+            int thumbHeight = 16;
+            int thumbX = thumbRect.x + (thumbRect.width - thumbWidth) / 2;
+            int thumbY = thumbRect.y + (thumbRect.height - thumbHeight) / 2;
+
+            g2d.setColor(Color.WHITE);
+            g2d.fillOval(thumbX, thumbY, thumbWidth, thumbHeight);
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.drawOval(thumbX, thumbY, thumbWidth, thumbHeight);
+        }
+
+        @Override
+        public void paintTicks(Graphics g) {
+            super.paintTicks(g); // Garder l'affichage des ticks
+        }
+
+        @Override
+        public void paintLabels(Graphics g) {
+            super.paintLabels(g); // Garder l'affichage des labels
+        }
     }
 }
