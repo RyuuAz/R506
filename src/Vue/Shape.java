@@ -6,18 +6,21 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class Shape {
-	private int x, y, width, height;
-	private boolean isRectangle; // true pour rectangle, false pour cercle
-	private Color color;
+    private int x, y, width, height;
+    private boolean isRectangle; // true pour rectangle, false pour cercle
+    private Color color;
+    private RenderText renderText = null;
+    private boolean isOver = false;
 
-	public Shape(int x, int y, int width, int height, boolean isRectangle, Color color) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.isRectangle = isRectangle;
-		this.color = color;
-	}
+    public Shape(int x, int y, int width, int height, boolean isRectangle, Color color, RenderText renderText) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.isRectangle = isRectangle;
+        this.color = color;
+        this.renderText = renderText;
+    }
 
 	public void draw(Graphics2D g2d) {
 		g2d.setColor(color);
@@ -73,7 +76,31 @@ public class Shape {
 		return height;
 	}
 
-	public boolean isRectangle() {
-		return isRectangle;
-	}
+    public boolean isRectangle() {
+        return isRectangle;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public RenderText getRenderText() {
+        return renderText;
+    }
+
+    public void setRenderText(RenderText renderText) {
+        this.renderText = renderText;
+    }
+
+    public boolean isOver() {
+        return isOver;
+    }
+
+    public void setOver(boolean over) {
+        isOver = over;
+    }
 }
