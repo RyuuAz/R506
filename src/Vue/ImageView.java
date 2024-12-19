@@ -46,6 +46,7 @@ public class ImageView extends JFrame {
     private boolean isDrawingCircle = false;
     private boolean isPasting = false;
     private int clickX, clickY;
+    private BufferedImage[] textureImage = new BufferedImage[1];
 
     private BufferedImage image, imageTemp,imageCopy ,imagePaste,originalImage = null;
 
@@ -377,7 +378,7 @@ public class ImageView extends JFrame {
                 panel.add(fontComboBox);
         
                 // Sélecteur de taille de police (JSpinner)
-                SpinnerModel sizeModel = new SpinnerNumberModel(20, 1, 100, 1); // Min 1, Max 100, Incr 1
+                SpinnerModel sizeModel = new SpinnerNumberModel(20, 1, 100, 1);
                 JSpinner fontSizeSpinner = new JSpinner(sizeModel);
                 panel.add(new JLabel("Choisissez la taille de la police :"));
                 panel.add(fontSizeSpinner);
@@ -385,21 +386,56 @@ public class ImageView extends JFrame {
                 // Sélecteur de couleur (JColorChooser)
                 JButton colorButton = new JButton("Choisir la couleur");
                 panel.add(new JLabel("Choisissez la couleur :"));
+        
+                // Carré pour afficher la couleur sélectionnée
+                JPanel colorPreview = new JPanel();
+                colorPreview.setPreferredSize(new Dimension(30, 30));
+                colorPreview.setBackground(Color.BLACK);
+                panel.add(colorPreview);
+        
                 panel.add(colorButton);
         
-                // Ouvrir le JColorChooser quand on clique sur le bouton
                 Color[] selectedColor = new Color[1];
+                selectedColor[0] = Color.BLACK;
+        
                 colorButton.addActionListener(ae -> {
-                    selectedColor[0] = JColorChooser.showDialog(ImageView.this, "Sélectionner une couleur", Color.BLACK);
+                    Color color = JColorChooser.showDialog(ImageView.this, "Sélectionner une couleur", selectedColor[0]);
+                    if (color != null) {
+                        selectedColor[0] = color;
+                        colorPreview.setBackground(color); // Met à jour l'aperçu
+                    }
                 });
+        
+                // Case à cocher pour activer ou désactiver la texture
+                JCheckBox textureCheckBox = new JCheckBox("Activer la texture");
+                textureCheckBox.setSelected(false);
+                panel.add(textureCheckBox);
         
                 // Bouton pour importer une texture
                 JButton textureButton = new JButton("Importer une texture");
-                textureButton.setEnabled(false); // Désactivé par défaut
+                textureButton.setEnabled(false);
+        
+                // Carré pour afficher la texture sélectionnée
+                BufferedImage[] textureImage = new BufferedImage[1];
+                JPanel texturePreview = new JPanel() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        if (textureImage[0] != null) {
+                            g.drawImage(textureImage[0], 0, 0, getWidth(), getHeight(), this);
+                        } else {
+                            g.setColor(Color.LIGHT_GRAY);
+                            g.fillRect(0, 0, getWidth(), getHeight());
+                        }
+                    }
+                };
+                texturePreview.setPreferredSize(new Dimension(100, 100));
+                texturePreview.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        
                 panel.add(new JLabel("Ou choisissez une texture :"));
+                panel.add(texturePreview);
                 panel.add(textureButton);
         
-                BufferedImage[] textureImage = new BufferedImage[1];
                 textureButton.addActionListener(ae -> {
                     JFileChooser fileChooser = new JFileChooser();
                     fileChooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "png", "jpeg"));
@@ -407,30 +443,27 @@ public class ImageView extends JFrame {
                     if (result == JFileChooser.APPROVE_OPTION) {
                         try {
                             textureImage[0] = ImageIO.read(fileChooser.getSelectedFile());
+                            texturePreview.repaint();
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(ImageView.this, 
+                            JOptionPane.showMessageDialog(ImageView.this,
                                     "Erreur lors du chargement de la texture.",
                                     "Erreur", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
         
-                // Checkbox pour activer ou désactiver la texture
-                JCheckBox useTextureCheckBox = new JCheckBox("Activer la texture");
-                panel.add(useTextureCheckBox);
-        
-                // Activer/Désactiver le bouton texture et couleur en fonction de la checkbox
-                useTextureCheckBox.addItemListener(ae -> {
-                    boolean textureEnabled = useTextureCheckBox.isSelected();
-                    textureButton.setEnabled(textureEnabled);  // Activer/Désactiver le bouton texture
-                    colorButton.setEnabled(!textureEnabled);  // Désactiver le bouton couleur si texture activée
+                // Activer/Désactiver la texture et désactiver le bouton de couleur
+                textureCheckBox.addActionListener(ae -> {
+                    boolean isTextureEnabled = textureCheckBox.isSelected();
+                    textureButton.setEnabled(isTextureEnabled);
+                    texturePreview.setVisible(isTextureEnabled);
+                    colorButton.setEnabled(!isTextureEnabled);
+                    colorPreview.setEnabled(!isTextureEnabled);
                 });
         
-                // Afficher la boîte de dialogue avec les champs
-                int option = JOptionPane.showConfirmDialog(ImageView.this, panel, "Ajouter du texte à l'image",
-                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        
-                if (option == JOptionPane.OK_OPTION) {
+                // Afficher le panneau
+                int result = JOptionPane.showConfirmDialog(ImageView.this, panel, "Ajouter du texte", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
                     try {
                         // Vérifier si le champ texte est rempli
                         String text = textField.getText().trim();
@@ -448,7 +481,7 @@ public class ImageView extends JFrame {
         
                         // Activer ou désactiver la texture
                         TexturePaint texturePaint = null;
-                        if (useTextureCheckBox.isSelected() && textureImage[0] != null) {
+                        if (textureCheckBox.isSelected() && textureImage[0] != null) {
                             // Créer un TexturePaint pour appliquer la texture
                             Rectangle2D rect = new Rectangle2D.Double(0, 0, textureImage[0].getWidth(), textureImage[0].getHeight());
                             texturePaint = new TexturePaint(textureImage[0], rect);
@@ -477,7 +510,8 @@ public class ImageView extends JFrame {
                     }
                 }
             }
-        });        
+        });
+                               
         
 
         addMouseListeners();
