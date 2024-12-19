@@ -165,54 +165,45 @@ public class ImageModel {
         // Translation et rotation selon le sens de rotation
         if (clockwise) {
             // Rotation horaire : tourner et déplacer l'image
-            return rotateImageInverse(source, 90);
+            return rotateImageInverse(source, 90, source.getWidth(),source.getHeight());
 
         } else {
             // Rotation antihoraire : tourner et déplacer l'image
-            return rotateImageInverse(source, -90);
+            return rotateImageInverse(source, -90, source.getWidth(),source.getHeight());
         }
     }
 
-    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees) {
-        int width = source.getWidth();
-        int height = source.getHeight();
+    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees, int x, int y) {
+        System.out.println("rotateImageInverse");
+        System.out.println("angleDegrees: " + angleDegrees);
+        System.out.println("x: " + x);
+        System.out.println("y: " + y);
+        System.out.println(source.getWidth());
+        System.out.println(source.getHeight());
+        
+        // fait la rotate avec g2d
+        int width = x;
+        int height = y;
+
+        double angleRadians = Math.toRadians(angleDegrees); 
     
-        double angleRadians = Math.toRadians(angleDegrees);
+        double sin = Math.abs(Math.sin(angleRadians));
+        double cos = Math.abs(Math.cos(angleRadians));
+        int newWidth = (int) (width * cos + height * sin);
+        int newHeight = (int) (width * sin + height * cos);
     
-        // Calcul de la nouvelle taille pour contenir l'image entière
-        int newWidth = (int) Math.round(Math.abs(width * Math.cos(angleRadians)) + Math.abs(height * Math.sin(angleRadians)));
-        int newHeight = (int) Math.round(Math.abs(height * Math.cos(angleRadians)) + Math.abs(width * Math.sin(angleRadians)));
-    
-        // Créer une image avec transparence pour la nouvelle taille
-        BufferedImage result = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage result = new BufferedImage(newWidth, newHeight, source.getType());
         Graphics2D g2d = result.createGraphics();
     
-        // Activer des rendus de haute qualité
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    
-        // Remplir le fond avec la transparence
-        g2d.setComposite(AlphaComposite.Clear);
-        g2d.fillRect(0, 0, newWidth, newHeight);
-    
-        // Réinitialiser la transparence pour dessiner l'image
-        g2d.setComposite(AlphaComposite.SrcOver);
-    
-        // Centrer l'image dans la nouvelle zone
-        g2d.translate((newWidth - width) / 2.0, (newHeight - height) / 2.0);
-    
-        // Appliquer la rotation autour du centre de l'image originale
+        g2d.translate((newWidth - width) / 2, (newHeight - height) / 2);
         g2d.rotate(angleRadians, width / 2.0, height / 2.0);
-    
-        // Dessiner l'image d'origine
         g2d.drawRenderedImage(source, null);
-    
         g2d.dispose();
+    
         return result;
+
     }
-    
-    
 
     public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
         int width = image.getWidth();

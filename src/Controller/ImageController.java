@@ -105,7 +105,8 @@ public class ImageController {
     }
 
     public BufferedImage rotateImageByAngle(BufferedImage image, int angle) {
-        return model.rotateImageInverse(image, angle);
+        return model.rotateImageInverse(image, angle, activeView.getImageI(0).getWidth(),
+                activeView.getImageI(0).getHeight());
     }
 
     public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
