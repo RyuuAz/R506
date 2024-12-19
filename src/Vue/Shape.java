@@ -10,6 +10,7 @@ public class Shape {
     private boolean isRectangle; // true pour rectangle, false pour cercle
     private Color color;
     private RenderText renderText = null;
+    private boolean isOver = false;
 
     public Shape(int x, int y, int width, int height, boolean isRectangle, Color color, RenderText renderText) {
         this.x = x;
@@ -93,5 +94,13 @@ public class Shape {
 
     public void setRenderText(RenderText renderText) {
         this.renderText = renderText;
+    }
+
+    public boolean isOver() {
+        return isOver;
+    }
+
+    public void setOver(boolean over) {
+        isOver = over;
     }
 }
