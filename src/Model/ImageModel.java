@@ -136,76 +136,70 @@ public class ImageModel {
 		return image;
 	}
 
-    public boolean isWithinTolerance(int color1, int color2, int tolerance) {
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
+	public boolean isWithinTolerance(int color1, int color2, int tolerance) {
+		int r1 = (color1 >> 16) & 0xFF;
+		int g1 = (color1 >> 8) & 0xFF;
+		int b1 = color1 & 0xFF;
 
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
+		int r2 = (color2 >> 16) & 0xFF;
+		int g2 = (color2 >> 8) & 0xFF;
+		int b2 = color2 & 0xFF;
 
-        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
-        return distance < tolerance;
-    }
+		double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+		return distance < tolerance;
+	}
 
-    public boolean isWithinToleranceC(Color color1, Color color2, int tolerance) {
-        int r1 = color1.getRed();
-        int g1 = color1.getGreen();
-        int b1 = color1.getBlue();
+	public boolean isWithinToleranceC(Color color1, Color color2, int tolerance) {
+		int r1 = color1.getRed();
+		int g1 = color1.getGreen();
+		int b1 = color1.getBlue();
 
-        int r2 = color2.getRed();
-        int g2 = color2.getGreen();
-        int b2 = color2.getBlue();
+		int r2 = color2.getRed();
+		int g2 = color2.getGreen();
+		int b2 = color2.getBlue();
 
-        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
-        return distance <= tolerance;
-    }
+		double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+		return distance <= tolerance;
+	}
 
-    // Appliquer une rotation
-    public BufferedImage rotateImage(BufferedImage source, boolean clockwise) {
-        // Translation et rotation selon le sens de rotation
-        if (clockwise) {
-            // Rotation horaire : tourner et déplacer l'image
-            return rotateImageInverse(source, 90, source.getWidth(),source.getHeight());
+	// Appliquer une rotation
+	public BufferedImage rotateImage(BufferedImage source, boolean clockwise) {
+		// Translation et rotation selon le sens de rotation
+		if (clockwise) {
+			// Rotation horaire : tourner et déplacer l'image
+			return rotateImageInverse(source, 90, source.getWidth(), source.getHeight());
 
-        } else {
-            // Rotation antihoraire : tourner et déplacer l'image
-            return rotateImageInverse(source, -90, source.getWidth(),source.getHeight());
-        }
-    }
+		} else {
+			// Rotation antihoraire : tourner et déplacer l'image
+			return rotateImageInverse(source, -90, source.getWidth(), source.getHeight());
+		}
+	}
 
-    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees, int x, int y) {
-        System.out.println("rotateImageInverse");
-        System.out.println("angleDegrees: " + angleDegrees);
-        System.out.println("x: " + x);
-        System.out.println("y: " + y);
-        System.out.println(source.getWidth());
-        System.out.println(source.getHeight());
-        
-        // fait la rotate avec g2d
-        int width = x;
-        int height = y;
+	public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees, int x, int y) {
 
-        double angleRadians = Math.toRadians(angleDegrees); 
-    
-        double sin = Math.abs(Math.sin(angleRadians));
-        double cos = Math.abs(Math.cos(angleRadians));
-        int newWidth = (int) (width * cos + height * sin);
-        int newHeight = (int) (width * sin + height * cos);
-    
-        BufferedImage result = new BufferedImage(newWidth, newHeight, source.getType());
-        Graphics2D g2d = result.createGraphics();
-    
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.translate((newWidth - width) / 2, (newHeight - height) / 2);
-        g2d.rotate(angleRadians, width / 2.0, height / 2.0);
-        g2d.drawRenderedImage(source, null);
-        g2d.dispose();
-    
-        return result;
+		// fait la rotate avec g2d
+		int width = x;
+		int height = y;
 
-    }
+		double angleRadians = Math.toRadians(angleDegrees);
+
+		double sin = Math.abs(Math.sin(angleRadians));
+		double cos = Math.abs(Math.cos(angleRadians));
+		int newWidth = (int) (width * cos + height * sin);
+		int newHeight = (int) (width * sin + height * cos);
+
+		BufferedImage result = new BufferedImage(newWidth, newHeight, source.getType());
+		Graphics2D g2d = result.createGraphics();
+
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.translate((newWidth - width) / 2, (newHeight - height) / 2);
+		g2d.rotate(angleRadians, width / 2.0, height / 2.0);
+		g2d.drawRenderedImage(source, null);
+		g2d.dispose();
+
+		return result;
+
+	}
 
 	public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
 		int width = image.getWidth();
@@ -262,23 +256,23 @@ public class ImageModel {
 				green = clamp(green);
 				blue = clamp(blue);
 
-                // Appliquer la nouvelle couleur
-                image.setRGB(x, y, new Color(red, green, blue).getRGB());
-            }
-        }
-        return image;
-    }
+				// Appliquer la nouvelle couleur
+				image.setRGB(x, y, new Color(red, green, blue).getRGB());
+			}
+		}
+		return image;
+	}
 
-    public int getTextWidth(String text, Font font) {
-        if (text == null || font == null) {
-            return 0; // Éviter les NullPointerException
-        }
-        BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = tempImage.createGraphics();
-        FontMetrics metrics = g2d.getFontMetrics(font);
-        g2d.dispose();
-        return metrics.stringWidth(text);
-    }
+	public int getTextWidth(String text, Font font) {
+		if (text == null || font == null) {
+			return 0; // Éviter les NullPointerException
+		}
+		BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = tempImage.createGraphics();
+		FontMetrics metrics = g2d.getFontMetrics(font);
+		g2d.dispose();
+		return metrics.stringWidth(text);
+	}
 
 	// Méthode pour limiter la valeur entre 0 et 255
 	private int clamp(int value) {

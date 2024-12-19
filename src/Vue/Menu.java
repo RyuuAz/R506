@@ -52,116 +52,118 @@ public class Menu extends JPanel {
 		FlatLightLaf.setup(); // Setup FlatLaf Light theme
 		JMenuBar menuBar = new JMenuBar();
 
-        // Menu Fichier
-        JMenu fileMenu = new JMenu("Fichier");
-        JMenuItem openItem = new JMenuItem("Ouvrir");
-        openItem.setAccelerator(KeyStroke.getKeyStroke("control O"));
-        openItem.addActionListener((ActionEvent e) -> System.out.println("Ouvrir sélectionné"));
+		// Menu Fichier
+		JMenu fileMenu = new JMenu("Fichier");
+		JMenuItem openItem = new JMenuItem("Ouvrir");
+		openItem.setAccelerator(KeyStroke.getKeyStroke("control O"));
+		openItem.addActionListener((ActionEvent e) -> System.out.println("Ouvrir sélectionné"));
 
-        JMenuItem saveItem = new JMenuItem("Sauvegarder");
-        saveItem.setAccelerator(KeyStroke.getKeyStroke("control S"));
-        saveItem.addActionListener((ActionEvent e) -> System.out.println("Sauvegarder sélectionné"));
+		JMenuItem saveItem = new JMenuItem("Sauvegarder");
+		saveItem.setAccelerator(KeyStroke.getKeyStroke("control S"));
+		saveItem.addActionListener((ActionEvent e) -> System.out.println("Sauvegarder sélectionné"));
 
-        fileMenu.add(openItem);
-        fileMenu.add(saveItem);
+		fileMenu.add(openItem);
+		fileMenu.add(saveItem);
 
 		// Menu Édition
 		JMenu editMenu = new JMenu("Édition");
 
-        // Sous-menu Transformation
-        JMenu transformMenu = new JMenu("Transformation");
-        JMenuItem rotateLeftItem = new JMenuItem("Rotation gauche");
-        rotateLeftItem.setAccelerator(KeyStroke.getKeyStroke("control LEFT"));
-        rotateLeftItem.addActionListener((ActionEvent e) -> System.out.println("Rotation gauche sélectionnée"));
+		// Sous-menu Transformation
+		JMenu transformMenu = new JMenu("Transformation");
+		JMenuItem rotateLeftItem = new JMenuItem("Rotation gauche");
+		rotateLeftItem.setAccelerator(KeyStroke.getKeyStroke("control LEFT"));
+		rotateLeftItem.addActionListener((ActionEvent e) -> System.out.println("Rotation gauche sélectionnée"));
 
-        JMenuItem rotateRightItem = new JMenuItem("Rotation droite");
-        rotateRightItem.setAccelerator(KeyStroke.getKeyStroke("control RIGHT"));
-        rotateRightItem.addActionListener((ActionEvent e) -> System.out.println("Rotation droite sélectionnée"));
+		JMenuItem rotateRightItem = new JMenuItem("Rotation droite");
+		rotateRightItem.setAccelerator(KeyStroke.getKeyStroke("control RIGHT"));
+		rotateRightItem.addActionListener((ActionEvent e) -> System.out.println("Rotation droite sélectionnée"));
 
-        JMenuItem rotateCustomItem = new JMenuItem("Rotation personnalisée");
-        rotateCustomItem.setAccelerator(KeyStroke.getKeyStroke("control R"));
-        rotateCustomItem.addActionListener((ActionEvent e) -> System.out.println("Rotation personnalisée sélectionnée"));
+		JMenuItem rotateCustomItem = new JMenuItem("Rotation personnalisée");
+		rotateCustomItem.setAccelerator(KeyStroke.getKeyStroke("control R"));
+		rotateCustomItem
+				.addActionListener((ActionEvent e) -> System.out.println("Rotation personnalisée sélectionnée"));
 
-        JMenuItem flipHorizontalItem = new JMenuItem("Retourner horizontalement");
-        flipHorizontalItem.setAccelerator(KeyStroke.getKeyStroke("control UP"));
-        flipHorizontalItem.addActionListener((ActionEvent e) -> System.out.println("Retourner horizontalement sélectionné"));
+		JMenuItem flipHorizontalItem = new JMenuItem("Retourner horizontalement");
+		flipHorizontalItem.setAccelerator(KeyStroke.getKeyStroke("control UP"));
+		flipHorizontalItem
+				.addActionListener((ActionEvent e) -> System.out.println("Retourner horizontalement sélectionné"));
 
-        JMenuItem flipVerticalItem = new JMenuItem("Retourner verticalement");
-        flipVerticalItem.setAccelerator(KeyStroke.getKeyStroke("control DOWN"));
-        flipVerticalItem.addActionListener((ActionEvent e) -> System.out.println("Retourner verticalement sélectionné"));
+		JMenuItem flipVerticalItem = new JMenuItem("Retourner verticalement");
+		flipVerticalItem.setAccelerator(KeyStroke.getKeyStroke("control DOWN"));
+		flipVerticalItem
+				.addActionListener((ActionEvent e) -> System.out.println("Retourner verticalement sélectionné"));
 
-        transformMenu.add(rotateLeftItem);
-        transformMenu.add(rotateRightItem);
-        transformMenu.add(rotateCustomItem);
-        transformMenu.addSeparator();
-        transformMenu.add(flipHorizontalItem);
-        transformMenu.add(flipVerticalItem);
+		transformMenu.add(rotateLeftItem);
+		transformMenu.add(rotateRightItem);
+		transformMenu.add(rotateCustomItem);
+		transformMenu.addSeparator();
+		transformMenu.add(flipHorizontalItem);
+		transformMenu.add(flipVerticalItem);
 
-        // Sous-menu Couleur
-        JMenu colorMenu = new JMenu("Couleur");
-        JMenuItem pickColorItem = new JMenuItem("Pipette de couleur");
-        pickColorItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
-        pickColorItem.addActionListener((ActionEvent e) -> System.out.println("Pipette de couleur sélectionnée"));
+		// Sous-menu Couleur
+		JMenu colorMenu = new JMenu("Couleur");
+		JMenuItem pickColorItem = new JMenuItem("Pipette de couleur");
+		pickColorItem.setAccelerator(KeyStroke.getKeyStroke("control I"));
+		pickColorItem.addActionListener((ActionEvent e) -> System.out.println("Pipette de couleur sélectionnée"));
 
-        JMenuItem paintBucketItem = new JMenuItem("Seau de peinture");
-        paintBucketItem.setAccelerator(KeyStroke.getKeyStroke("control P"));
-        paintBucketItem.addActionListener((ActionEvent e) -> System.out.println("Seau de peinture sélectionné"));
+		JMenuItem paintBucketItem = new JMenuItem("Seau de peinture");
+		paintBucketItem.setAccelerator(KeyStroke.getKeyStroke("control P"));
+		paintBucketItem.addActionListener((ActionEvent e) -> System.out.println("Seau de peinture sélectionné"));
 
-        colorMenu.add(pickColorItem);
-        colorMenu.add(paintBucketItem);
+		colorMenu.add(pickColorItem);
+		colorMenu.add(paintBucketItem);
 
-        // Sous-menu Luminosité/Contraste
-        JMenu brightnessMenu = new JMenu("Luminosité / Contraste");
-        JMenuItem brightenPlusItem = new JMenuItem("Luminosité +");
-        brightenPlusItem.setAccelerator(KeyStroke.getKeyStroke("control ADD"));
-        brightenPlusItem.addActionListener((ActionEvent e) -> System.out.println("Luminosité + sélectionnée"));
+		// Sous-menu Luminosité/Contraste
+		JMenu brightnessMenu = new JMenu("Luminosité / Contraste");
+		JMenuItem brightenPlusItem = new JMenuItem("Luminosité +");
+		brightenPlusItem.setAccelerator(KeyStroke.getKeyStroke("control ADD"));
+		brightenPlusItem.addActionListener((ActionEvent e) -> System.out.println("Luminosité + sélectionnée"));
 
-        JMenuItem brightenMinusItem = new JMenuItem("Luminosité -");
-        brightenMinusItem.setAccelerator(KeyStroke.getKeyStroke("control SUBTRACT"));
-        brightenMinusItem.addActionListener((ActionEvent e) -> System.out.println("Luminosité - sélectionnée"));
+		JMenuItem brightenMinusItem = new JMenuItem("Luminosité -");
+		brightenMinusItem.setAccelerator(KeyStroke.getKeyStroke("control SUBTRACT"));
+		brightenMinusItem.addActionListener((ActionEvent e) -> System.out.println("Luminosité - sélectionnée"));
 
-        JMenuItem contrastPlusItem = new JMenuItem("Contraste +");
-        contrastPlusItem.setAccelerator(KeyStroke.getKeyStroke("control shift ADD"));
-        contrastPlusItem.addActionListener((ActionEvent e) -> System.out.println("Contraste + sélectionné"));
+		JMenuItem contrastPlusItem = new JMenuItem("Contraste +");
+		contrastPlusItem.setAccelerator(KeyStroke.getKeyStroke("control shift ADD"));
+		contrastPlusItem.addActionListener((ActionEvent e) -> System.out.println("Contraste + sélectionné"));
 
-        JMenuItem contrastMinusItem = new JMenuItem("Contraste -");
-        contrastMinusItem.setAccelerator(KeyStroke.getKeyStroke("control shift SUBTRACT"));
-        contrastMinusItem.addActionListener((ActionEvent e) -> System.out.println("Contraste - sélectionné"));
+		JMenuItem contrastMinusItem = new JMenuItem("Contraste -");
+		contrastMinusItem.setAccelerator(KeyStroke.getKeyStroke("control shift SUBTRACT"));
+		contrastMinusItem.addActionListener((ActionEvent e) -> System.out.println("Contraste - sélectionné"));
 
-        brightnessMenu.add(brightenPlusItem);
-        brightnessMenu.add(brightenMinusItem);
-        brightnessMenu.addSeparator();
-        brightnessMenu.add(contrastPlusItem);
-        brightnessMenu.add(contrastMinusItem);
+		brightnessMenu.add(brightenPlusItem);
+		brightnessMenu.add(brightenMinusItem);
+		brightnessMenu.addSeparator();
+		brightnessMenu.add(contrastPlusItem);
+		brightnessMenu.add(contrastMinusItem);
 
-        // Sous-menu Dessin
-        JMenu drawMenu = new JMenu("Dessin");
-        JMenuItem drawRectangleItem = new JMenuItem("Rectangle");
-        drawRectangleItem.setAccelerator(KeyStroke.getKeyStroke("control shift E"));
-        drawRectangleItem.addActionListener((ActionEvent e) -> System.out.println("Rectangle sélectionné"));
+		// Sous-menu Dessin
+		JMenu drawMenu = new JMenu("Dessin");
+		JMenuItem drawRectangleItem = new JMenuItem("Rectangle");
+		drawRectangleItem.setAccelerator(KeyStroke.getKeyStroke("control shift E"));
+		drawRectangleItem.addActionListener((ActionEvent e) -> System.out.println("Rectangle sélectionné"));
 
-        JMenuItem drawCircleItem = new JMenuItem("Cercle");
-        drawCircleItem.setAccelerator(KeyStroke.getKeyStroke("control E"));
-        drawCircleItem.addActionListener((ActionEvent e) -> System.out.println("Cercle sélectionné"));
+		JMenuItem drawCircleItem = new JMenuItem("Cercle");
+		drawCircleItem.setAccelerator(KeyStroke.getKeyStroke("control E"));
+		drawCircleItem.addActionListener((ActionEvent e) -> System.out.println("Cercle sélectionné"));
 
-        drawMenu.add(drawRectangleItem);
-        drawMenu.add(drawCircleItem);
+		drawMenu.add(drawRectangleItem);
+		drawMenu.add(drawCircleItem);
 
-        // Sous-menu Texte
-        JMenu textMenu = new JMenu("Texte");
-        JMenuItem addTextItem = new JMenuItem("Ajouter du texte");
-        addTextItem.setAccelerator(KeyStroke.getKeyStroke("control T"));
-        textMenu.add(addTextItem);
+		// Sous-menu Texte
+		JMenu textMenu = new JMenu("Texte");
+		JMenuItem addTextItem = new JMenuItem("Ajouter du texte");
+		addTextItem.setAccelerator(KeyStroke.getKeyStroke("control T"));
+		textMenu.add(addTextItem);
 
-
-        // Ajouter les sous-menus au menu Édition
-        editMenu.add(transformMenu);
-        editMenu.add(colorMenu);
-        editMenu.addSeparator();
-        editMenu.add(brightnessMenu);
-        editMenu.add(drawMenu);
-        editMenu.addSeparator();
-        editMenu.add(textMenu);
+		// Ajouter les sous-menus au menu Édition
+		editMenu.add(transformMenu);
+		editMenu.add(colorMenu);
+		editMenu.addSeparator();
+		editMenu.add(brightnessMenu);
+		editMenu.add(drawMenu);
+		editMenu.addSeparator();
+		editMenu.add(textMenu);
 
 		// Ajouter les menus à la barre de menus
 		menuBar.add(fileMenu);
@@ -179,7 +181,7 @@ public class Menu extends JPanel {
 
 		// Slider de tolérance en pourcentage avec style FlatLaf
 		JLabel toleranceLabel = new JLabel("Tolérance:");
-		toleranceSlider = new JSlider(0, 100, 20);
+		toleranceSlider = new JSlider(0, 255, 80);
 		toleranceSlider.setUI(new FlatLafCustomSliderUI(toleranceSlider));
 		toleranceSlider.setMajorTickSpacing(20);
 		toleranceSlider.setMinorTickSpacing(5);
@@ -195,17 +197,17 @@ public class Menu extends JPanel {
 		colorDisplayPanel.setBackground(Color.BLACK);
 		colorDisplayPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        colorDisplayPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Color newColor = JColorChooser.showDialog(Menu.this, "Choisir une couleur",
-                        colorDisplayPanel.getBackground());
-                if (newColor != null) {
-                    colorDisplayPanel.setBackground(newColor);
-                    view.setColor(newColor);
-                }
-            }
-        });
+		colorDisplayPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Color newColor = JColorChooser.showDialog(Menu.this, "Choisir une couleur",
+						colorDisplayPanel.getBackground());
+				if (newColor != null) {
+					colorDisplayPanel.setBackground(newColor);
+					view.setColor(newColor);
+				}
+			}
+		});
 
 		toolBar.add(colorDisplayPanel);
 
@@ -267,53 +269,57 @@ public class Menu extends JPanel {
 		openItem.addActionListener(this::handleOpenImage);
 		saveItem.addActionListener(this::handleSaveImage);
 
-        addTextItem.addActionListener(e -> {
-            if (controller != null) {
-                TextInput textInputPanel = new TextInput();
-                int result = JOptionPane.showConfirmDialog(view, textInputPanel, "Ajouter du texte", JOptionPane.OK_CANCEL_OPTION);
-        
-                if (result == JOptionPane.OK_OPTION) {
-                    try {
-                        String text = textInputPanel.getTextInput();
-                        if (text.isEmpty()) {
-                            JOptionPane.showMessageDialog(view, "Veuillez entrer un texte avant de valider.", "Champ vide", JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-        
-                        // Récupérer les propriétés
-                        Font font = textInputPanel.getSelectedFont();
-                        Color color = textInputPanel.getSelectedColor();
-                        BufferedImage texture = textInputPanel.getSelectedTexture();
-        
-                        // Calculer la position centrée
-                        int imageWidth = view.getImagLabel().getWidth();
-                        int imageHeight = view.getImagLabel().getHeight();
-                        int textWidth = controller.getTextWidth(text, font);
-                        int x = (imageWidth - textWidth) / 2;
-                        int y = (imageHeight + font.getSize()) / 2;
-        
-                        // Créer un objet RenderText
-                        RenderText renderText = new RenderText(x, y, text, font, color, textWidth);
-                        if (texture != null) {
-                            TexturePaint texturePaint = new TexturePaint(texture, new Rectangle(0, 0, texture.getWidth(), texture.getHeight()));
-                            renderText.setTexture(texturePaint);
-                        }
-        
-                        // Ajouter le texte à la liste
-                        view.getShapeTextes().add(new Shape(x - 20, y - font.getSize(), textWidth + 20, font.getSize() + 20, true, color, renderText));
-                        view.getImagLabel().repaint();
-        
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(view, "Erreur d'entrée ! Veuillez entrer des valeurs valides.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-                  
+		addTextItem.addActionListener(e -> {
+			if (controller != null) {
+				TextInput textInputPanel = new TextInput();
+				int result = JOptionPane.showConfirmDialog(view, textInputPanel, "Ajouter du texte",
+						JOptionPane.OK_CANCEL_OPTION);
 
-        paintBucketItem.addActionListener(e -> {
-            view.togglePaintBucket(e);
-        });
+				if (result == JOptionPane.OK_OPTION) {
+					try {
+						String text = textInputPanel.getTextInput();
+						if (text.isEmpty()) {
+							JOptionPane.showMessageDialog(view, "Veuillez entrer un texte avant de valider.",
+									"Champ vide", JOptionPane.WARNING_MESSAGE);
+							return;
+						}
+
+						// Récupérer les propriétés
+						Font font = textInputPanel.getSelectedFont();
+						Color color = textInputPanel.getSelectedColor();
+						BufferedImage texture = textInputPanel.getSelectedTexture();
+
+						// Calculer la position centrée
+						int imageWidth = view.getImagLabel().getWidth();
+						int imageHeight = view.getImagLabel().getHeight();
+						int textWidth = controller.getTextWidth(text, font);
+						int x = (imageWidth - textWidth) / 2;
+						int y = (imageHeight + font.getSize()) / 2;
+
+						// Créer un objet RenderText
+						RenderText renderText = new RenderText(x, y, text, font, color, textWidth);
+						if (texture != null) {
+							TexturePaint texturePaint = new TexturePaint(texture,
+									new Rectangle(0, 0, texture.getWidth(), texture.getHeight()));
+							renderText.setTexture(texturePaint);
+						}
+
+						// Ajouter le texte à la liste
+						view.getShapeTextes().add(new Shape(x - 20, y - font.getSize(), textWidth + 20,
+								font.getSize() + 20, true, color, renderText));
+						view.getImagLabel().repaint();
+
+					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(view, "Erreur d'entrée ! Veuillez entrer des valeurs valides.",
+								"Erreur", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		});
+
+		paintBucketItem.addActionListener(e -> {
+			view.togglePaintBucket(e);
+		});
 		paintBucketItem.addActionListener(e -> {
 			view.togglePaintBucket(e);
 		});
@@ -323,72 +329,72 @@ public class Menu extends JPanel {
 			view.togglePickColor(e);
 		});
 
-        rotateLeftItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(), false), false);
-            }
-        });
+		rotateLeftItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.rotate(view.getImageTemp(), false), false);
+			}
+		});
 
-        rotateRightItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(), true), false);
-            }
-        });
+		rotateRightItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.rotate(view.getImageTemp(), true), false);
+			}
+		});
 
-        rotateCustomItem.addActionListener(e -> {
-            if (controller != null) {
-                String angleStr = JOptionPane.showInputDialog(Menu.this, "Enter rotation angle (degrees):",
-                        "Rotate Custom",
-                        JOptionPane.PLAIN_MESSAGE);
-                try {
-                    int angle = Integer.parseInt(angleStr);
-                    this.view.setImageAngle(0, view.getImageAngle() + angle);
-                    int angle2 = view.getImageAngle();
-                    view.updateImage(controller.rotateImageByAngle(view.getImageI(0), angle2), false);
+		rotateCustomItem.addActionListener(e -> {
+			if (controller != null) {
+				String angleStr = JOptionPane.showInputDialog(Menu.this, "Enter rotation angle (degrees):",
+						"Rotate Custom",
+						JOptionPane.PLAIN_MESSAGE);
+				try {
+					int angle = Integer.parseInt(angleStr);
+					this.view.setImageAngle(0, view.getImageAngle() + angle);
+					int angle2 = view.getImageAngle();
+					view.updateImage(controller.rotateImageByAngle(view.getImageI(0), angle2), false);
 
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
+				} catch (NumberFormatException ex) {
+					JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 
-        flipHorizontalItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.flipImage(view.getImageTemp(), true), false);
-            }
-        });
+		flipHorizontalItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.flipImage(view.getImageTemp(), true), false);
+			}
+		});
 
-        flipVerticalItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.flipImage(view.getImageTemp(), false), false);
-            }
-        });
+		flipVerticalItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.flipImage(view.getImageTemp(), false), false);
+			}
+		});
 
-        brightenPlusItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10), false);
-            }
-        });
+		brightenPlusItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10), false);
+			}
+		});
 
-        brightenMinusItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10), false);
-            }
-        });
+		brightenMinusItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10), false);
+			}
+		});
 
-        contrastPlusItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.adjustContrast(view.getImageTemp(), 10), false);
-            }
-        });
+		contrastPlusItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.adjustContrast(view.getImageTemp(), 10), false);
+			}
+		});
 
-        contrastMinusItem.addActionListener(e -> {
-            if (controller != null) {
-                view.updateImage(controller.adjustContrast(view.getImageTemp(), -10), false);
-            }
-        });
+		contrastMinusItem.addActionListener(e -> {
+			if (controller != null) {
+				view.updateImage(controller.adjustContrast(view.getImageTemp(), -10), false);
+			}
+		});
 
 		copierButton.addActionListener(e -> {
 			if (controller != null) {
@@ -404,7 +410,7 @@ public class Menu extends JPanel {
 
 		removeColorButton.addActionListener(e -> {
 			if (controller != null) {
-				//view.updateImage(view.removeColorFromImage(view.getImageTemp()), true);
+				view.deleteBackground();
 			}
 		});
 
@@ -420,35 +426,35 @@ public class Menu extends JPanel {
 			}
 		});
 
-        // Raccourcis clavier
-        KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
-        KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
-        KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
-        KeyStroke pickColorKeyStroke = KeyStroke.getKeyStroke("control I");
-        KeyStroke rotateLeftKeyStroke = KeyStroke.getKeyStroke("control LEFT");
-        KeyStroke rotateRightKeyStroke = KeyStroke.getKeyStroke("control RIGHT");
-        KeyStroke rotateCustomKeyStroke = KeyStroke.getKeyStroke("control R");
-        KeyStroke flipHorizontalKeyStroke = KeyStroke.getKeyStroke("control UP");
-        KeyStroke flipVerticalKeyStroke = KeyStroke.getKeyStroke("control DOWN");
-        KeyStroke brightenPlusKeyStroke = KeyStroke.getKeyStroke("control ADD");
-        KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
-        KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
-        KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
-        KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control shift E"); //changer le raccourci
-        KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control E");
-        KeyStroke copyKeyStroke = KeyStroke.getKeyStroke("control C");
-        KeyStroke copyWithoutBackgroundKeyStroke = KeyStroke.getKeyStroke("control shift C");
-        KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke("control V");
-        KeyStroke selectedShapeStroke = KeyStroke.getKeyStroke("control A");
+		// Raccourcis clavier
+		KeyStroke openKeyStroke = KeyStroke.getKeyStroke("control O");
+		KeyStroke saveKeyStroke = KeyStroke.getKeyStroke("control S");
+		KeyStroke paintBucketKeyStroke = KeyStroke.getKeyStroke("control P");
+		KeyStroke pickColorKeyStroke = KeyStroke.getKeyStroke("control I");
+		KeyStroke rotateLeftKeyStroke = KeyStroke.getKeyStroke("control LEFT");
+		KeyStroke rotateRightKeyStroke = KeyStroke.getKeyStroke("control RIGHT");
+		KeyStroke rotateCustomKeyStroke = KeyStroke.getKeyStroke("control R");
+		KeyStroke flipHorizontalKeyStroke = KeyStroke.getKeyStroke("control UP");
+		KeyStroke flipVerticalKeyStroke = KeyStroke.getKeyStroke("control DOWN");
+		KeyStroke brightenPlusKeyStroke = KeyStroke.getKeyStroke("control ADD");
+		KeyStroke brightenMoinKeyStroke = KeyStroke.getKeyStroke("control SUBTRACT");
+		KeyStroke darkenPlusKeyStroke = KeyStroke.getKeyStroke("control shift ADD");
+		KeyStroke darkenMoinKeyStroke = KeyStroke.getKeyStroke("control shift SUBTRACT");
+		KeyStroke drawRectangleKeyStroke = KeyStroke.getKeyStroke("control shift E"); // changer le raccourci
+		KeyStroke drawCircleKeyStroke = KeyStroke.getKeyStroke("control E");
+		KeyStroke copyKeyStroke = KeyStroke.getKeyStroke("control C");
+		KeyStroke copyWithoutBackgroundKeyStroke = KeyStroke.getKeyStroke("control shift C");
+		KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke("control V");
+		KeyStroke selectedShapeStroke = KeyStroke.getKeyStroke("control A");
 
-        openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(selectedShapeStroke, "selectedShapeStroke");
-        openItem.getActionMap().put("selectedShapeStroke", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSelectAllShapes(e);
+		openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(selectedShapeStroke, "selectedShapeStroke");
+		openItem.getActionMap().put("selectedShapeStroke", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handleSelectAllShapes(e);
 
-            }
-        });
+			}
+		});
 
 		openItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(openKeyStroke, "open");
 		openItem.getActionMap().put("open", new AbstractAction() {
@@ -482,108 +488,108 @@ public class Menu extends JPanel {
 			}
 		});
 
-        rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
-        rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.rotate(view.getImageTemp(), false), false);
-                }
-            }
-        });
+		rotateLeftItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateLeftKeyStroke, "rotateLeft");
+		rotateLeftItem.getActionMap().put("rotateLeft", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.rotate(view.getImageTemp(), false), false);
+				}
+			}
+		});
 
-        rotateRightItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateRightKeyStroke, "rotateRight");
-        rotateRightItem.getActionMap().put("rotateRight", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.rotate(view.getImageTemp(), true), false);
-                }
-            }
-        });
+		rotateRightItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateRightKeyStroke, "rotateRight");
+		rotateRightItem.getActionMap().put("rotateRight", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.rotate(view.getImageTemp(), true), false);
+				}
+			}
+		});
 
-        rotateCustomItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateCustomKeyStroke, "rotateCustom");
-        rotateCustomItem.getActionMap().put("rotateCustom", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    String angleStr = JOptionPane.showInputDialog(Menu.this, "Enter rotation angle (degrees):",
-                            "Rotate Custom",
-                            JOptionPane.PLAIN_MESSAGE);
-                    try {
-                        int angle = Integer.parseInt(angleStr);
-                        int angle2 = view.getImageAngle()+angle;
-                        view.setImageAngle(0, angle2);
-                        view.updateImage(controller.rotateImageByAngle(view.getImageI(0), angle2), false);
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
+		rotateCustomItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(rotateCustomKeyStroke, "rotateCustom");
+		rotateCustomItem.getActionMap().put("rotateCustom", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					String angleStr = JOptionPane.showInputDialog(Menu.this, "Enter rotation angle (degrees):",
+							"Rotate Custom",
+							JOptionPane.PLAIN_MESSAGE);
+					try {
+						int angle = Integer.parseInt(angleStr);
+						int angle2 = view.getImageAngle() + angle;
+						view.setImageAngle(0, angle2);
+						view.updateImage(controller.rotateImageByAngle(view.getImageI(0), angle2), false);
+					} catch (NumberFormatException ex) {
+						JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
+								"Error",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		});
 
-        flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke,
-                "flipHorizontal");
-        flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp(), true), false);
-                }
-            }
-        });
+		flipHorizontalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipHorizontalKeyStroke,
+				"flipHorizontal");
+		flipHorizontalItem.getActionMap().put("flipHorizontal", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.flipImage(view.getImageTemp(), true), false);
+				}
+			}
+		});
 
-        flipVerticalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipVerticalKeyStroke, "flipVertical");
-        flipVerticalItem.getActionMap().put("flipVertical", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp(), false), false);
-                }
-            }
-        });
+		flipVerticalItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(flipVerticalKeyStroke, "flipVertical");
+		flipVerticalItem.getActionMap().put("flipVertical", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.flipImage(view.getImageTemp(), false), false);
+				}
+			}
+		});
 
-        brightenPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenPlusKeyStroke, "brightenPlus");
-        brightenPlusItem.getActionMap().put("brightenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10), false);
-                }
-            }
-        });
+		brightenPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenPlusKeyStroke, "brightenPlus");
+		brightenPlusItem.getActionMap().put("brightenPlus", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10), false);
+				}
+			}
+		});
 
-        brightenMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenMoinKeyStroke, "brightenMoin");
-        brightenMinusItem.getActionMap().put("brightenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10), false);
-                }
-            }
-        });
+		brightenMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(brightenMoinKeyStroke, "brightenMoin");
+		brightenMinusItem.getActionMap().put("brightenMoin", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10), false);
+				}
+			}
+		});
 
-        contrastPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenPlusKeyStroke, "darkenPlus");
-        contrastPlusItem.getActionMap().put("darkenPlus", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.adjustContrast(view.getImageTemp(), 10), false);
-                }
-            }
-        });
+		contrastPlusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenPlusKeyStroke, "darkenPlus");
+		contrastPlusItem.getActionMap().put("darkenPlus", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.adjustContrast(view.getImageTemp(), 10), false);
+				}
+			}
+		});
 
-        contrastMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenMoinKeyStroke, "darkenMoin");
-        contrastMinusItem.getActionMap().put("darkenMoin", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (controller != null) {
-                    view.updateImage(controller.adjustContrast(view.getImageTemp(), -10), false);
-                }
-            }
-        });
+		contrastMinusItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(darkenMoinKeyStroke, "darkenMoin");
+		contrastMinusItem.getActionMap().put("darkenMoin", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (controller != null) {
+					view.updateImage(controller.adjustContrast(view.getImageTemp(), -10), false);
+				}
+			}
+		});
 
 		drawRectangleItem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(drawRectangleKeyStroke, "drawRectangle");
 		drawRectangleItem.getActionMap().put("drawRectangle", new AbstractAction() {
@@ -615,12 +621,13 @@ public class Menu extends JPanel {
 			}
 		});
 
-		copierSansFButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyWithoutBackgroundKeyStroke, "copyWithoutBackground");
+		copierSansFButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(copyWithoutBackgroundKeyStroke,
+				"copyWithoutBackground");
 		copierSansFButton.getActionMap().put("copyWithoutBackground", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (controller != null) {
-					//view.copyImageWithoutBackground();
+					view.copyWithoutBackground();
 				}
 			}
 		});
@@ -635,17 +642,16 @@ public class Menu extends JPanel {
 			}
 		});
 
-    }
+	}
 
-    private void handleSelectAllShapes(ActionEvent e) {
-        if (controller != null) {
-            for (Shape shape : view.getShapeTextes()) {
-                shape.setIsSelected(true);
-            }
-        }
+	private void handleSelectAllShapes(ActionEvent e) {
+		if (controller != null) {
+			for (Shape shape : view.getShapeTextes()) {
+				shape.setIsSelected(true);
+			}
+		}
 
-        
-    }
+	}
 
 	private void handleOpenImage(ActionEvent e) {
 		if (controller != null) {

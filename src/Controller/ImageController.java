@@ -27,27 +27,27 @@ public class ImageController {
 		openNewView(null); // Ouvrir une première fenêtre sans image
 	}
 
-    public void openNewView(BufferedImage image) {
-        ImageView newView = new ImageView(this); // Crée une nouvelle vue
-        if (image != null) {
-            newView.updateImage(image,false); // Charge l'image si elle est fournie
-        }
-        views.add(newView); // Ajoute la vue à la liste
-        setActiveView(newView);
-    }
+	public void openNewView(BufferedImage image) {
+		ImageView newView = new ImageView(this); // Crée une nouvelle vue
+		if (image != null) {
+			newView.updateImage(image, false); // Charge l'image si elle est fournie
+		}
+		views.add(newView); // Ajoute la vue à la liste
+		setActiveView(newView);
+	}
 
-    public void openImage(File file) {
-        try {
-            if (activeView.getImage() == null) {
-                activeView.updateImage(model.loadImageFromFile(file),false); // Ferme la fenêtre active
-            } else {
-                openNewView(model.loadImageFromFile(file));
-            } // Crée une nouvelle fenêtre avec l'image
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Failed to open image: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
+	public void openImage(File file) {
+		try {
+			if (activeView.getImage() == null) {
+				activeView.updateImage(model.loadImageFromFile(file), false); // Ferme la fenêtre active
+			} else {
+				openNewView(model.loadImageFromFile(file));
+			} // Crée une nouvelle fenêtre avec l'image
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Failed to open image: " + e.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
 	public void saveImage(BufferedImage image, File file) {
 		try {
@@ -59,10 +59,10 @@ public class ImageController {
 		}
 	}
 
-    public void copyImage(BufferedImage image,Shape shape) {
-        clipboard = image; // Sauvegarde l'image dans le presse-papiers
-        this.shape = shape;
-    }
+	public void copyImage(BufferedImage image, Shape shape) {
+		clipboard = image; // Sauvegarde l'image dans le presse-papiers
+		this.shape = shape;
+	}
 
 	public void pasteImage(ImageView targetView) {
 		if (clipboard != null) {
@@ -105,10 +105,10 @@ public class ImageController {
 		return model.rotateImage(image, clockwise);
 	}
 
-    public BufferedImage rotateImageByAngle(BufferedImage image, int angle) {
-        return model.rotateImageInverse(image, angle, activeView.getImageI(0).getWidth(),
-                activeView.getImageI(0).getHeight());
-    }
+	public BufferedImage rotateImageByAngle(BufferedImage image, int angle) {
+		return model.rotateImageInverse(image, angle, activeView.getImageI(1).getWidth(),
+				activeView.getImageI(0).getHeight());
+	}
 
 	public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
 		return model.flipImage(image, horizontal);
@@ -118,17 +118,17 @@ public class ImageController {
 		return model.adjustBrightness(image, brighten);
 	}
 
-    public BufferedImage adjustContrast(BufferedImage image, int contrast) {
-        return model.adjustContrast(image, contrast);
-    }
+	public BufferedImage adjustContrast(BufferedImage image, int contrast) {
+		return model.adjustContrast(image, contrast);
+	}
 
-    public int getTextWidth(String text, Font font) {
-        return model.getTextWidth(text, font);
-    }
+	public int getTextWidth(String text, Font font) {
+		return model.getTextWidth(text, font);
+	}
 
-    public boolean isWithintolerance(Color target, Color replacement, int tolerance) {
-        return model.isWithinToleranceC(target, replacement, tolerance);
-    }
+	public boolean isWithintolerance(Color target, Color replacement, int tolerance) {
+		return model.isWithinToleranceC(target, replacement, tolerance);
+	}
 
 	public static void main(String[] args) {
 		new ImageController();

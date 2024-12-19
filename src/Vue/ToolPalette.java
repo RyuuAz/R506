@@ -32,16 +32,16 @@ public class ToolPalette extends JToolBar {
 		paintBucketButton.addActionListener(e -> {
 			view.togglePaintBucket(e);
 		});
-	
+
 		// ActionListener pour la pipette
 		pickColorButton.addActionListener(e -> {
 			view.togglePickColor(e);
 		});
-	
+
 		selectRectangleButton.addActionListener(e -> {
 			view.toggleIsDrawingRectangle();
 		});
-	
+
 		selectCircleButton.addActionListener(e -> {
 			view.toggleIsDrawingCircle();
 		});
