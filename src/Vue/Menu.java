@@ -213,6 +213,7 @@ public class Menu extends JPanel {
 		// Ajouter des boutons à la barre d'outils et leur icones
 		JButton copierButton = new JButton("Copier");
 		ImageIcon copierIcon = new ImageIcon("img/ToolPalette/copy.png");
+
 		// Redimensionner l'icône
 		Image copierImage = copierIcon.getImage();
 		Image newCopierImage = copierImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
@@ -222,6 +223,7 @@ public class Menu extends JPanel {
 
 		JButton copierSansFButton = new JButton("Copier sans fond");
 		ImageIcon copierSansFIcon = new ImageIcon("img/ToolPalette/copy_without_background.png");
+
 		// Redimensionner l'icône
 		Image copierSansFImage = copierSansFIcon.getImage();
 		Image newCopierSansFImage = copierSansFImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
@@ -231,6 +233,7 @@ public class Menu extends JPanel {
 
 		JButton collerButton = new JButton("Coller");
 		ImageIcon collerIcon = new ImageIcon("img/ToolPalette/paste.png");
+
 		// Redimensionner l'icône
 		Image collerImage = collerIcon.getImage();
 		Image newCollerImage = collerImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
@@ -241,6 +244,20 @@ public class Menu extends JPanel {
 		toolBar.add(copierButton);
 		toolBar.add(copierSansFButton);
 		toolBar.add(collerButton);
+
+		// Ajouter des séparateurs entre les groupes d'outils
+		toolBar.addSeparator();
+
+		JButton removeColorButton = new JButton("Supprimer la couleur");
+		ImageIcon removeColorIcon = new ImageIcon("img/ToolPalette/remove_color.png");
+
+		// Redimensionner l'icône
+		Image removeColorImage = removeColorIcon.getImage();
+		Image newRemoveColorImage = removeColorImage.getScaledInstance(iconSize, iconSize, java.awt.Image.SCALE_SMOOTH);
+		removeColorIcon = new ImageIcon(newRemoveColorImage);
+		removeColorButton.setIcon(removeColorIcon);
+
+		toolBar.add(removeColorButton);
 
 		// Ajouter la barre de menus et la barre d'outils au topPanel
 		this.add(menuBar);
@@ -378,6 +395,12 @@ public class Menu extends JPanel {
 		collerButton.addActionListener(e -> {
 			if (controller != null) {
 				controller.pasteImage(view);
+			}
+		});
+
+		removeColorButton.addActionListener(e -> {
+			if (controller != null) {
+				//view.updateImage(view.removeColorFromImage(view.getImageTemp()), true);
 			}
 		});
 

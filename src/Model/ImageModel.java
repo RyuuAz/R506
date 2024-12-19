@@ -6,6 +6,7 @@ import Controller.ImageController;
 import Vue.Shape;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -174,43 +175,38 @@ public class ImageModel {
 		}
 	}
 
-    public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees) {
-        int width = source.getWidth();
-        int height = source.getHeight();
-    
-        double angleRadians = Math.toRadians(angleDegrees);
-    
-        // Calcul de la nouvelle taille pour contenir l'image entière
-        int newWidth = (int) Math.round(Math.abs(width * Math.cos(angleRadians)) + Math.abs(height * Math.sin(angleRadians)));
-        int newHeight = (int) Math.round(Math.abs(height * Math.cos(angleRadians)) + Math.abs(width * Math.sin(angleRadians)));
-    
-        // Créer une image avec transparence pour la nouvelle taille
-        BufferedImage result = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = result.createGraphics();
-    
-        // Activer des rendus de haute qualité
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    
-        // Remplir le fond avec la transparence
-        g2d.setComposite(AlphaComposite.Clear);
-        g2d.fillRect(0, 0, newWidth, newHeight);
-    
-        // Réinitialiser la transparence pour dessiner l'image
-        g2d.setComposite(AlphaComposite.SrcOver);
-    
-        // Centrer l'image dans la nouvelle zone
-        g2d.translate((newWidth - width) / 2.0, (newHeight - height) / 2.0);
-    
-        // Appliquer la rotation autour du centre de l'image originale
-        g2d.rotate(angleRadians, width / 2.0, height / 2.0);
-    
-        // Dessiner l'image d'origine
-        g2d.drawRenderedImage(source, null);
-    
+    public static BufferedImage rotateImageInverse(BufferedImage sourceImage, double angle) {
+        // Convert angle to radians
+        double radians = Math.toRadians(angle);
+
+        // Calculate the new dimensions of the image
+        double sin = Math.abs(Math.sin(radians));
+        double cos = Math.abs(Math.cos(radians));
+        int newWidth = (int) Math.ceil(sourceImage.getWidth() * cos + sourceImage.getHeight() * sin);
+        int newHeight = (int) Math.ceil(sourceImage.getWidth() * sin + sourceImage.getHeight() * cos);
+
+        // Create a new image with transparent background
+        BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = rotatedImage.createGraphics();
+
+        // Enable anti-aliasing for smoother rotation
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+
+        // Calculate the translation to keep the image centered
+        int translateX = (newWidth - sourceImage.getWidth()) / 2;
+        int translateY = (newHeight - sourceImage.getHeight()) / 2;
+
+        // Apply the transformation
+        AffineTransform transform = new AffineTransform();
+        transform.translate(translateX, translateY); // Center the original image in the new canvas
+        transform.rotate(radians, sourceImage.getWidth() / 2.0, sourceImage.getHeight() / 2.0); // Rotate around the center of the original image
+
+        // Draw the rotated image
+        g2d.drawImage(sourceImage, transform, null);
         g2d.dispose();
-        return result;
+
+        return rotatedImage;
     }
     
     
