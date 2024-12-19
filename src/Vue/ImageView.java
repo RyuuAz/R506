@@ -112,6 +112,7 @@ public class ImageView extends JFrame {
                         if (shapeTexte.isOver()) {
                             shapeTexte.draw(g2d);
                         }
+                        shapeTexte.getRenderText().draw(g2d, shapeTexte.getRenderText().getX(), shapeTexte.getRenderText().getY());
                     }
                 }
                 if (renderTexts.size() > 0) {
@@ -228,17 +229,6 @@ public class ImageView extends JFrame {
 
     }
 
-    private int getTextWidth(String text, Font font) {
-        if (text == null || font == null) {
-            return 0; // Éviter les NullPointerException
-        }
-        BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = tempImage.createGraphics();
-        FontMetrics metrics = g2d.getFontMetrics(font);
-        g2d.dispose();
-        return metrics.stringWidth(text);
-    }
-
     public void togglePickColor(ActionEvent e) {
         if (controller != null) {
             if (isPainting || isPickingColor) {
@@ -343,7 +333,7 @@ public class ImageView extends JFrame {
                 if (shape != null && shape.contains(e.getX(), e.getY()) && !isDrawingRectangle && !isDrawingCircle) {
                     selectedShape = shape;
                     lastMousePosition = e.getPoint();
-
+                    
                 } else if (isDrawingRectangle || isDrawingCircle) {
                     clickX = e.getX();
                     clickY = e.getY();
@@ -353,7 +343,9 @@ public class ImageView extends JFrame {
 
                     for (Shape shapeTexte : shapeTextes) {
                         if (shapeTexte.contains(e.getX(), e.getY())) {
+                            
                             selectedShape = shapeTexte;
+                            shapeTexte.setIsSelected(true);
                             lastMousePosition = e.getPoint();
                             break;
                         }
@@ -368,11 +360,14 @@ public class ImageView extends JFrame {
                 if (currentShape != null) {
                     shape = currentShape; // Ajoute la forme temporaire à la liste des formes
                     currentShape = null; // Réinitialise la forme temporaire
-
                 }
-                selectedShape = null;
+                
                 isDrawingCircle = false;
                 isDrawingRectangle = false;
+                for (Shape shapeTexte : shapeTextes) {
+                    shapeTexte.setIsSelected(false);
+                }
+                selectedShape = null;
             }
         });
 
@@ -384,10 +379,21 @@ public class ImageView extends JFrame {
                     int deltaY = e.getY() - lastMousePosition.y;
                     selectedShape.moveTo(selectedShape.getX() + deltaX, selectedShape.getY() + deltaY);
                     if (selectedShape.getRenderText() != null) {
-                        selectedShape.getRenderText().moveTo(selectedShape.getRenderText().getX() + deltaX,
-                                selectedShape.getRenderText().getY() + deltaY);
-                    }
+                        selectedShape.getRenderText().moveTo(selectedShape.getRenderText().getX() + deltaX, selectedShape.getRenderText().getY() + deltaY);
+                        if (shapeTextes.size() >1 ) {
+                            for (Shape shapeTexte : shapeTextes) {
+                                if (shapeTexte != selectedShape ) {
+                                    if(shapeTexte.getIsSelected()){
+                                        shapeTexte.moveTo(shapeTexte.getX() + deltaX, shapeTexte.getY() + deltaY);
+                                    shapeTexte.getRenderText().moveTo(shapeTexte.getRenderText().getX() + deltaX, shapeTexte.getRenderText().getY() + deltaY);
+                                    }
 
+                                    
+                                }
+                            }
+                        }
+                    }
+                    
                     lastMousePosition = e.getPoint();
                     imageLabel.repaint();
                 } else if ((isDrawingCircle || isDrawingRectangle)) {
@@ -426,6 +432,7 @@ public class ImageView extends JFrame {
                         currentShape.setX(startX);
                         currentShape.setY(startY);
                         currentShape.resize(width, height);
+                        
                     } else {
                         currentShape = new Shape(e.getX(), e.getY(), 0, 0, isDrawingRectangle, Color.RED, null); // Initialise
                         shape = null; // une forme
@@ -644,6 +651,15 @@ public class ImageView extends JFrame {
     public void setColor(Color color) {
         this.pickedColor = color;
     }
+
+    public JLabel getImagLabel() {
+        return imageLabel;
+    }
+
+    public ArrayList<Shape> getShapeTextes() {
+        return shapeTextes;
+    }
+
 
     // Méthode pour afficher le menu avec uniquement les éléments nécessaires
     // copier, copier sans fond, supprimer

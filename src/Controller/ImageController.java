@@ -4,6 +4,7 @@ import Model.ImageModel;
 import Vue.ImageView;
 import Vue.Shape;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -119,6 +120,10 @@ public class ImageController {
 
     public BufferedImage adjustContrast(BufferedImage image, int contrast) {
         return model.adjustContrast(image, contrast);
+    }
+
+    public int getTextWidth(String text, Font font) {
+        return model.getTextWidth(text, font);
     }
 
     public boolean isWithintolerance(Color target, Color replacement, int tolerance) {
