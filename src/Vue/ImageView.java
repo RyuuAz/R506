@@ -32,22 +32,16 @@ public class ImageView extends JFrame {
     private ImageController controller;
     private ImageModel model;
     private Color pickedColor;
-    private boolean isPickingColor = false;
-    private boolean isPainting = false;
-    private boolean isRemoving = false;
+    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
     private Shape shape;
     private ArrayList<Shape> shapeTextes = new ArrayList<>();
 
-    private Shape currentShape = null; // Forme temporaire en cours de dessin
-    private Shape selectedShape = null;
+    private Shape currentShape,selectedShape = null; // Forme temporaire en cours de dessin
     private ArrayList<RenderText> renderTexts = new ArrayList<>();
     private Point lastMousePosition;
-    private boolean isDrawingRectangle = false;
-    private boolean isDrawingCircle = false;
-    private boolean isPasting = false;
     private int clickX, clickY;
     private BufferedImage[] textureImage = new BufferedImage[1];
 
