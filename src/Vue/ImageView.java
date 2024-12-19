@@ -32,22 +32,16 @@ public class ImageView extends JFrame {
     private ImageController controller;
     private ImageModel model;
     private Color pickedColor;
-    private boolean isPickingColor = false;
-    private boolean isPainting = false;
-    private boolean isRemoving = false;
+    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor,isCopyingWithoutColor = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
     private Shape shape;
     private ArrayList<Shape> shapeTextes = new ArrayList<>();
 
-    private Shape currentShape = null; // Forme temporaire en cours de dessin
-    private Shape selectedShape = null;
+    private Shape currentShape,selectedShape = null; // Forme temporaire en cours de dessin
     private ArrayList<RenderText> renderTexts = new ArrayList<>();
     private Point lastMousePosition;
-    private boolean isDrawingRectangle = false;
-    private boolean isDrawingCircle = false;
-    private boolean isPasting = false;
     private int clickX, clickY;
     private BufferedImage[] textureImage = new BufferedImage[1];
 
@@ -160,10 +154,10 @@ public class ImageView extends JFrame {
                             // Vérifiez si il y a une forme sélectionnée
                             if (shape != null) {
                                 updateImage(controller.applyPaintBucket(getImageTemp(), imageX, imageY, pickedColor,
-                                        menu.getSliderValue(), shape, imageLabel));
+                                        menu.getSliderValue(), shape, imageLabel),false);
                             } else {
                                 updateImage(controller.applyPaintBucket(getImageTemp(), imageX, imageY, pickedColor,
-                                        menu.getSliderValue(), null, imageLabel));
+                                        menu.getSliderValue(), null, imageLabel),false);
                             }
                         }
                     }
@@ -174,13 +168,31 @@ public class ImageView extends JFrame {
             }
         });
 
+        // Event pour ouvire un menu au clic droit
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (shape != null && e.isPopupTrigger() && shape.contains(e.getX(), e.getY())) {
+                    showMenu(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (shape != null && e.isPopupTrigger() && shape.contains(e.getX(), e.getY())) {
+                    showMenu(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+
         // Event pour la pipette
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int x = evt.getX();
+                int y = evt.getY();
                 if (isPickingColor) {
-                    int x = evt.getX();
-                    int y = evt.getY();
+                    
 
                     // Ajustement des coordonnées
                     int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
@@ -195,6 +207,12 @@ public class ImageView extends JFrame {
 
                     isPickingColor = false;
                     setCursor(Cursor.getDefaultCursor());
+                } else if (isPasting && !shape.contains(x, y)) {
+
+                    updateImage(imageTemp,true);
+                    isPasting = false;
+                    setCursor(Cursor.getDefaultCursor());
+                    shape = null;
                 }
             }
         });
@@ -270,12 +288,14 @@ public class ImageView extends JFrame {
 
     }
 
-    public void updateImage(BufferedImage image) {
+    public void updateImage(BufferedImage image, Boolean isSave) {
         if (this.image == null) {
 			this.image = image;
 			this.originalImage = deepCopy(image);
+            this.imageTemp = deepCopy(image);
 			
 		} 
+        if (isSave)this.originalImage = deepCopy(imageTemp);
         this.imageTemp = deepCopy(image);
         imageLabel.setIcon(new ImageIcon(imageTemp));
 
@@ -446,7 +466,7 @@ public class ImageView extends JFrame {
 					}
 
 					// Mise à jour de l'affichage
-					updateImage(imageTemp);
+					updateImage(imageTemp,false);
 					imageLabel.repaint();
 				}
 
@@ -489,11 +509,14 @@ public class ImageView extends JFrame {
     
         if (width > 0 && height > 0) {
             BufferedImage copiedImage;
+            BufferedImage subImage;
     
             if (shape.isRectangle()) {
+                 subImage = originalImage.getSubimage(x1, y1, width, height);
+
                 copiedImage = originalImage.getSubimage(x1, y1, width, height);
             } else {
-                BufferedImage subImage = originalImage.getSubimage(x1, y1, width, height);
+                 subImage = originalImage.getSubimage(x1, y1, width, height);
                 copiedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = copiedImage.createGraphics();
     
@@ -501,6 +524,21 @@ public class ImageView extends JFrame {
                 g2d.setClip(new Ellipse2D.Float(0, 0, width, height));
                 g2d.drawImage(subImage, 0, 0, null);
                 g2d.dispose();
+            }
+
+            if (isCopyingWithoutColor) {
+            
+                for (int i = 0; i < copiedImage.getWidth() ; i++) {
+                    for (int j = 0; j < copiedImage.getHeight(); j++) {
+                        int rgb = copiedImage.getRGB(i, j);
+                        if (this.controller.isWithintolerance(new Color(rgb), pickedColor, menu.getSliderValue())) {
+                            copiedImage.setRGB(i, j, (rgb & 0x00FFFFFF) | (0x00000000)); // Rendre transparent
+                            
+                        }
+                    }
+                }
+            
+                
             }
     
             // Dessiner le texte
@@ -511,18 +549,19 @@ public class ImageView extends JFrame {
                 if (shape.contains(shapeTexte.getX(), shapeTexte.getY())) {
                     RenderText renderText = shapeTexte.getRenderText();
                     if (renderText != null) {
-                        System.out.println("Dessin du texte : " + renderText.getText());
                         renderText.draw(g2d, shapeTexte.getX() - shape.getX(), shapeTexte.getY() - shape.getY());
-                    } else {
-                        System.out.println("Aucun texte à dessiner pour cette forme.");
                     }
                 }
             }
+
+            
+            
     
             g2d.dispose();
             this.imageCopy = copiedImage;
             this.controller.copyImage(imageCopy, shape);
             this.shape = null;
+            this.isCopyingWithoutColor = false;
             JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -550,7 +589,7 @@ public class ImageView extends JFrame {
 			Graphics2D g2d = imageTemp.createGraphics();
 			g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
 			g2d.dispose();
-			updateImage(imageTemp);
+			updateImage(imageTemp,false);
 		} else {
 			JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
 					JOptionPane.ERROR_MESSAGE);
@@ -591,4 +630,42 @@ public class ImageView extends JFrame {
     public ArrayList<Shape> getShapeTextes() {
         return shapeTextes;
     }
+
+    // Méthode pour afficher le menu avec uniquement les éléments nécessaires copier, copier sans fond, supprimer
+    public void showMenu(Component parent, int x, int y) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem copierItem = new JMenuItem("Copier");
+        JMenuItem copierSansFItem = new JMenuItem("Copier sans fond");
+        JMenuItem supprimerItem = new JMenuItem("Supprimer");
+
+        copierItem.addActionListener(e -> {
+            if (controller != null) {
+                copyImage();
+            }
+        });
+
+        copierSansFItem.addActionListener(e -> {
+            if (controller != null) {
+                this.isCopyingWithoutColor = true;
+                copyImage();
+            }
+        });
+
+        supprimerItem.addActionListener(e -> {
+            if (controller != null) {
+                deleteSelectedShape();
+            }
+        });
+
+        menu.add(copierItem);
+        menu.add(copierSansFItem);
+        menu.add(supprimerItem);
+        menu.show(parent, x, y);
+    }
+
+    public void deleteSelectedShape() {
+        this.shape = null;
+        imageLabel.repaint();
+    }
+
 }
