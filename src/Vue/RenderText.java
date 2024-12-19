@@ -41,6 +41,21 @@ public class RenderText {
         layout.draw(g2d, x, y);
     }
 
+	public void draw(Graphics2D g2d, int x, int y) {
+		if (texturePaint != null) {
+			// Si une texture est définie, on l'utilise pour dessiner le texte
+			g2d.setPaint(texturePaint);
+		} else {
+			// Sinon, on utilise la couleur normale
+			g2d.setColor(color);
+		}
+		g2d.setFont(font);
+
+		// Utilisation de TextLayout pour gérer les différentes tailles et positions de texte avec précision
+		TextLayout layout = new TextLayout(text, font, g2d.getFontRenderContext());
+		layout.draw(g2d, x, y);
+	}
+
     public boolean contains(int px, int py) {
         // On peut définir une zone d'interaction (par exemple, les bords du texte)
         return px >= x - 50 && px <= x + size + 50 && py >= y - 50 && py <= y + 50;
@@ -82,4 +97,12 @@ public class RenderText {
     public void setColor(Color color) {
         this.color = color;
     }
+
+	public Font getFont() {
+		return font;
+	}
+
+	public void setFont(Font font) {
+		this.font = font;
+	}
 }

@@ -47,7 +47,7 @@ public class ImageView extends JFrame {
     private boolean isPasting = false;
     private int clickX, clickY;
 
-    private BufferedImage image, imageTemp, imagePaste,originalImage = null;
+    private BufferedImage image, imageTemp,imageCopy ,imagePaste,originalImage = null;
 
     public ImageView(ImageController controller) {
         setTitle("Pix.net");
@@ -971,51 +971,62 @@ public class ImageView extends JFrame {
     }
 
     public void copyImage() {
-		if (shape == null) {
-			JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-	
-		Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
-		int x1 = Math.max(0, topLeft.x);
-		int y1 = Math.max(0, topLeft.y);
-		int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
-		int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
-	
-		int width = x2 - x1;
-		int height = y2 - y1;
-	
-		if (width > 0 && height > 0) {
-			if (shape.isRectangle()) { 
-				// Cas où la forme est rectangulaire : copie classique
-				this.imagePaste = this.image.getSubimage(x1, y1, width, height);
-			} else { 
-				// Cas où la forme n'est pas rectangulaire : appliquer un masque circulaire
-				BufferedImage subImage = image.getSubimage(x1, y1, width, height);
-	
-				// Créer une nouvelle image avec transparence
-				BufferedImage circularImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-				Graphics2D g2d = circularImage.createGraphics();
-	
-				// Activer l'anticrénelage pour des bords plus doux
-				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	
-				// Appliquer un masque circulaire (Ellipse)
-				g2d.setClip(new Ellipse2D.Float(0, 0, width, height));
-				g2d.drawImage(subImage, 0, 0, null);
-	
-				// Libérer les ressources
-				g2d.dispose();
-	
-				this.imagePaste = circularImage; 
-			}
-	
-			this.controller.copyImage(imagePaste, shape);
-			JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
-		} else {
-			JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+        if (shape == null) {
+            JOptionPane.showMessageDialog(this, "Aucune zone sélectionnée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        Point topLeft = convertToImageCoordinates(shape.getX(), shape.getY());
+        int x1 = Math.max(0, topLeft.x);
+        int y1 = Math.max(0, topLeft.y);
+        int x2 = Math.min(image.getWidth(), x1 + shape.getWidth());
+        int y2 = Math.min(image.getHeight(), y1 + shape.getHeight());
+    
+        int width = x2 - x1;
+        int height = y2 - y1;
+    
+        if (width > 0 && height > 0) {
+            BufferedImage copiedImage;
+    
+            if (shape.isRectangle()) {
+                copiedImage = originalImage.getSubimage(x1, y1, width, height);
+            } else {
+                BufferedImage subImage = originalImage.getSubimage(x1, y1, width, height);
+                copiedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = copiedImage.createGraphics();
+    
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setClip(new Ellipse2D.Float(0, 0, width, height));
+                g2d.drawImage(subImage, 0, 0, null);
+                g2d.dispose();
+            }
+    
+            // Dessiner le texte
+            Graphics2D g2d = copiedImage.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    
+            for (Shape shapeTexte : shapeTextes) {
+                if (shape.contains(shapeTexte.getX(), shapeTexte.getY())) {
+                    RenderText renderText = shapeTexte.getRenderText();
+                    if (renderText != null) {
+                        System.out.println("Dessin du texte : " + renderText.getText());
+                        renderText.draw(g2d, shapeTexte.getX() - shape.getX(), shapeTexte.getY() - shape.getY());
+                    } else {
+                        System.out.println("Aucun texte à dessiner pour cette forme.");
+                    }
+                }
+            }
+    
+            g2d.dispose();
+            this.imageCopy = copiedImage;
+            this.controller.copyImage(imageCopy, shape);
+            this.shape = null;
+            JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
 
     public void pasteImage(BufferedImage image) {
 		this.isPasting = true;
