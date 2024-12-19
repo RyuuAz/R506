@@ -109,6 +109,7 @@ public class ImageView extends JFrame {
                         if (shapeTexte.isOver()) {
                             shapeTexte.draw(g2d);
                         }
+                        shapeTexte.getRenderText().draw(g2d, shapeTexte.getRenderText().getX(), shapeTexte.getRenderText().getY());
                     }
                 } 
                 if (renderTexts.size() > 0) {
@@ -202,17 +203,6 @@ public class ImageView extends JFrame {
 
         this.setVisible(true);
 
-    }
-
-    private int getTextWidth(String text, Font font) {
-        if (text == null || font == null) {
-            return 0; // Éviter les NullPointerException
-        }
-        BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = tempImage.createGraphics();
-        FontMetrics metrics = g2d.getFontMetrics(font);
-        g2d.dispose();
-        return metrics.stringWidth(text);
     }
 
     public void togglePickColor(ActionEvent e) {
@@ -592,5 +582,13 @@ public class ImageView extends JFrame {
 
     public void setColor(Color color) {
         this.pickedColor = color;
+    }
+
+    public JLabel getImagLabel() {
+        return imageLabel;
+    }
+
+    public ArrayList<Shape> getShapeTextes() {
+        return shapeTextes;
     }
 }

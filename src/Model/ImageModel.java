@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import javax.imageio.ImageIO;
@@ -251,6 +252,17 @@ public class ImageModel {
             }
         }
         return image;
+    }
+
+    public int getTextWidth(String text, Font font) {
+        if (text == null || font == null) {
+            return 0; // Éviter les NullPointerException
+        }
+        BufferedImage tempImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = tempImage.createGraphics();
+        FontMetrics metrics = g2d.getFontMetrics(font);
+        g2d.dispose();
+        return metrics.stringWidth(text);
     }
 
     // Méthode pour limiter la valeur entre 0 et 255
