@@ -120,6 +120,10 @@ public class ImageController {
         return model.adjustContrast(image, contrast);
     }
 
+    public boolean isWithintolerance(Color target, Color replacement, int tolerance) {
+        return model.isWithinToleranceC(target, replacement, tolerance);
+    }
+
     public static void main(String[] args) {
         new ImageController();
     }

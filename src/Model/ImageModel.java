@@ -134,17 +134,32 @@ public class ImageModel {
         return image;
     }
 
-    private boolean isWithinTolerance(int color1, int color2, int tolerance) {
-        int r1 = (color1 / 256) / 256;
-        int g1 = (color1 / 256) % 256;
-        int b1 = color1 % 256;
+    public boolean isWithinTolerance(int color1, int color2, int tolerance) {
+        int r1 = (color1 >> 16) & 0xFF;
+        int g1 = (color1 >> 8) & 0xFF;
+        int b1 = color1 & 0xFF;
 
-        int r2 = (color2 / 256) / 256;
-        int g2 = (color2 / 256) % 256;
-        int b2 = color2 % 256;
+        int r2 = (color2 >> 16) & 0xFF;
+        int g2 = (color2 >> 8) & 0xFF;
+        int b2 = color2 & 0xFF;
 
-        return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)) < tolerance;
+        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+        return distance < tolerance;
     }
+
+    public boolean isWithinToleranceC(Color color1, Color color2, int tolerance) {
+        int r1 = color1.getRed();
+        int g1 = color1.getGreen();
+        int b1 = color1.getBlue();
+    
+        int r2 = color2.getRed();
+        int g2 = color2.getGreen();
+        int b2 = color2.getBlue();
+    
+        double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+        return distance <= tolerance;
+    }
+    
 
     // Appliquer une rotation
     public BufferedImage rotateImage(BufferedImage source, boolean clockwise) {

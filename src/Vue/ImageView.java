@@ -32,7 +32,7 @@ public class ImageView extends JFrame {
     private ImageController controller;
     private ImageModel model;
     private Color pickedColor;
-    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor = false;
+    private boolean isPainting,isRemoving,isDrawingRectangle,isDrawingCircle,isPasting,isPickingColor,isCopyingWithoutColor = false;
     private JPanel colorDisplayPanel;
     private Menu menu;
 
@@ -510,11 +510,14 @@ public class ImageView extends JFrame {
     
         if (width > 0 && height > 0) {
             BufferedImage copiedImage;
+            BufferedImage subImage;
     
             if (shape.isRectangle()) {
+                 subImage = originalImage.getSubimage(x1, y1, width, height);
+
                 copiedImage = originalImage.getSubimage(x1, y1, width, height);
             } else {
-                BufferedImage subImage = originalImage.getSubimage(x1, y1, width, height);
+                 subImage = originalImage.getSubimage(x1, y1, width, height);
                 copiedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = copiedImage.createGraphics();
     
@@ -522,6 +525,21 @@ public class ImageView extends JFrame {
                 g2d.setClip(new Ellipse2D.Float(0, 0, width, height));
                 g2d.drawImage(subImage, 0, 0, null);
                 g2d.dispose();
+            }
+
+            if (isCopyingWithoutColor) {
+                int nbpixels = 0; 
+                for (int i = 0; i < copiedImage.getWidth() ; i++) {
+                    for (int j = 0; j < copiedImage.getHeight(); j++) {
+                        int rgb = copiedImage.getRGB(i, j);
+                        if (this.controller.isWithintolerance(new Color(rgb), pickedColor, menu.getSliderValue())) {
+                            copiedImage.setRGB(i, j, (rgb & 0x00FFFFFF) | (0x00000000)); // Rendre transparent
+                            nbpixels++;
+                        }
+                    }
+                }
+            
+                
             }
     
             // Dessiner le texte
@@ -532,18 +550,19 @@ public class ImageView extends JFrame {
                 if (shape.contains(shapeTexte.getX(), shapeTexte.getY())) {
                     RenderText renderText = shapeTexte.getRenderText();
                     if (renderText != null) {
-                        System.out.println("Dessin du texte : " + renderText.getText());
                         renderText.draw(g2d, shapeTexte.getX() - shape.getX(), shapeTexte.getY() - shape.getY());
-                    } else {
-                        System.out.println("Aucun texte à dessiner pour cette forme.");
                     }
                 }
             }
+
+            
+            
     
             g2d.dispose();
             this.imageCopy = copiedImage;
             this.controller.copyImage(imageCopy, shape);
             this.shape = null;
+            this.isCopyingWithoutColor = false;
             JOptionPane.showMessageDialog(this, "Zone copiée.", "Information", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Zone invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -620,7 +639,8 @@ public class ImageView extends JFrame {
 
         copierSansFItem.addActionListener(e -> {
             if (controller != null) {
-                //copyImageWithoutBackground();
+                this.isCopyingWithoutColor = true;
+                copyImage();
             }
         });
 
