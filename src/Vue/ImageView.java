@@ -153,10 +153,10 @@ public class ImageView extends JFrame {
                             // Vérifiez si il y a une forme sélectionnée
                             if (shape != null) {
                                 updateImage(controller.applyPaintBucket(getImageTemp(), imageX, imageY, pickedColor,
-                                        menu.getSliderValue(), shape, imageLabel));
+                                        menu.getSliderValue(), shape, imageLabel),false);
                             } else {
                                 updateImage(controller.applyPaintBucket(getImageTemp(), imageX, imageY, pickedColor,
-                                        menu.getSliderValue(), null, imageLabel));
+                                        menu.getSliderValue(), null, imageLabel),false);
                             }
                         }
                     }
@@ -188,9 +188,10 @@ public class ImageView extends JFrame {
         imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int x = evt.getX();
+                int y = evt.getY();
                 if (isPickingColor) {
-                    int x = evt.getX();
-                    int y = evt.getY();
+                    
 
                     // Ajustement des coordonnées
                     int imageX = x - (imageLabel.getWidth() - image.getWidth()) / 2;
@@ -205,6 +206,12 @@ public class ImageView extends JFrame {
 
                     isPickingColor = false;
                     setCursor(Cursor.getDefaultCursor());
+                } else if (isPasting && !shape.contains(x, y)) {
+
+                    updateImage(imageTemp,true);
+                    isPasting = false;
+                    setCursor(Cursor.getDefaultCursor());
+                    shape = null;
                 }
             }
         });
@@ -291,12 +298,14 @@ public class ImageView extends JFrame {
 
     }
 
-    public void updateImage(BufferedImage image) {
+    public void updateImage(BufferedImage image, Boolean isSave) {
         if (this.image == null) {
 			this.image = image;
 			this.originalImage = deepCopy(image);
+            this.imageTemp = deepCopy(image);
 			
 		} 
+        if (isSave)this.originalImage = deepCopy(imageTemp);
         this.imageTemp = deepCopy(image);
         imageLabel.setIcon(new ImageIcon(imageTemp));
 
@@ -467,7 +476,7 @@ public class ImageView extends JFrame {
 					}
 
 					// Mise à jour de l'affichage
-					updateImage(imageTemp);
+					updateImage(imageTemp,false);
 					imageLabel.repaint();
 				}
 
@@ -528,13 +537,13 @@ public class ImageView extends JFrame {
             }
 
             if (isCopyingWithoutColor) {
-                int nbpixels = 0; 
+            
                 for (int i = 0; i < copiedImage.getWidth() ; i++) {
                     for (int j = 0; j < copiedImage.getHeight(); j++) {
                         int rgb = copiedImage.getRGB(i, j);
                         if (this.controller.isWithintolerance(new Color(rgb), pickedColor, menu.getSliderValue())) {
                             copiedImage.setRGB(i, j, (rgb & 0x00FFFFFF) | (0x00000000)); // Rendre transparent
-                            nbpixels++;
+                            
                         }
                     }
                 }
@@ -590,7 +599,7 @@ public class ImageView extends JFrame {
 			Graphics2D g2d = imageTemp.createGraphics();
 			g2d.drawImage(imagePaste, topLeft.x, topLeft.y, null);
 			g2d.dispose();
-			updateImage(imageTemp);
+			updateImage(imageTemp,false);
 		} else {
 			JOptionPane.showMessageDialog(this, "Aucune zone de collage sélectionnée.", "Erreur",
 					JOptionPane.ERROR_MESSAGE);

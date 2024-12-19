@@ -176,13 +176,13 @@ public class Menu extends JPanel {
 
         rotateLeftItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(), false));
+                view.updateImage(controller.rotate(view.getImageTemp(), false),false);
             }
         });
 
         rotateRightItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.rotate(view.getImageTemp(), true));
+                view.updateImage(controller.rotate(view.getImageTemp(), true),false);
             }
         });
 
@@ -193,7 +193,7 @@ public class Menu extends JPanel {
                         JOptionPane.PLAIN_MESSAGE);
                 try {
                     int angle = Integer.parseInt(angleStr);
-                    view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
+                    view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle),false);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
                             "Error",
@@ -204,37 +204,37 @@ public class Menu extends JPanel {
 
         flipHorizontalItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.flipImage(view.getImageTemp(), true));
+                view.updateImage(controller.flipImage(view.getImageTemp(), true),false);
             }
         });
 
         flipVerticalItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.flipImage(view.getImageTemp(), false));
+                view.updateImage(controller.flipImage(view.getImageTemp(), false),false);
             }
         });
 
         brightenPlusItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10));
+                view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10),false);
             }
         });
 
         brightenMinusItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10));
+                view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10),false);
             }
         });
 
         contrastPlusItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.adjustContrast(view.getImageTemp(), 10));
+                view.updateImage(controller.adjustContrast(view.getImageTemp(), 10),false);
             }
         });
 
         contrastMinusItem.addActionListener(e -> {
             if (controller != null) {
-                view.updateImage(controller.adjustContrast(view.getImageTemp(), -10));
+                view.updateImage(controller.adjustContrast(view.getImageTemp(), -10),false);
             }
         });
 
@@ -319,7 +319,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.rotate(view.getImageTemp(), false));
+                    view.updateImage(controller.rotate(view.getImageTemp(), false),false);
                 }
             }
         });
@@ -329,7 +329,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.rotate(view.getImageTemp(), true));
+                    view.updateImage(controller.rotate(view.getImageTemp(), true),false);
                 }
             }
         });
@@ -344,7 +344,7 @@ public class Menu extends JPanel {
                             JOptionPane.PLAIN_MESSAGE);
                     try {
                         int angle = Integer.parseInt(angleStr);
-                        view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle));
+                        view.updateImage(controller.rotateImageByAngle(view.getImageTemp(), angle),false);
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(Menu.this, "Invalid input! Please enter a numeric value.",
                                 "Error",
@@ -360,7 +360,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp(), true));
+                    view.updateImage(controller.flipImage(view.getImageTemp(), true),false);
                 }
             }
         });
@@ -370,7 +370,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.flipImage(view.getImageTemp(), false));
+                    view.updateImage(controller.flipImage(view.getImageTemp(), false),false);
                 }
             }
         });
@@ -380,7 +380,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10));
+                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), 10),false);
                 }
             }
         });
@@ -390,7 +390,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10));
+                    view.updateImage(controller.adjustBrightness(view.getImageTemp(), -10),false);
                 }
             }
         });
@@ -400,7 +400,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.adjustContrast(view.getImageTemp(), 10));
+                    view.updateImage(controller.adjustContrast(view.getImageTemp(), 10),false);
                 }
             }
         });
@@ -410,7 +410,7 @@ public class Menu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (controller != null) {
-                    view.updateImage(controller.adjustContrast(view.getImageTemp(), -10));
+                    view.updateImage(controller.adjustContrast(view.getImageTemp(), -10),false);
                 }
             }
         });

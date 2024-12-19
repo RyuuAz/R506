@@ -151,15 +151,14 @@ public class ImageModel {
         int r1 = color1.getRed();
         int g1 = color1.getGreen();
         int b1 = color1.getBlue();
-    
+
         int r2 = color2.getRed();
         int g2 = color2.getGreen();
         int b2 = color2.getBlue();
-    
+
         double distance = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
         return distance <= tolerance;
     }
-    
 
     // Appliquer une rotation
     public BufferedImage rotateImage(BufferedImage source, boolean clockwise) {
@@ -177,34 +176,43 @@ public class ImageModel {
     public BufferedImage rotateImageInverse(BufferedImage source, double angleDegrees) {
         int width = source.getWidth();
         int height = source.getHeight();
-
-        int i0 = width / 2;
-        int j0 = height / 2;
-
+    
         double angleRadians = Math.toRadians(angleDegrees);
-        double cosAngle = Math.cos(angleRadians);
-        double sinAngle = Math.sin(angleRadians);
-
-        BufferedImage destination = new BufferedImage(width, height, source.getType());
-
-        for (int iPrime = 0; iPrime < width; iPrime++) {
-            for (int jPrime = 0; jPrime < height; jPrime++) {
-                int xPrime = iPrime - i0;
-                int yPrime = jPrime - j0;
-
-                int x = (int) Math.round(xPrime * cosAngle - yPrime * sinAngle);
-                int y = (int) Math.round(xPrime * sinAngle + yPrime * cosAngle);
-
-                int i = x + i0;
-                int j = y + j0;
-
-                if (i >= 0 && i < width && j >= 0 && j < height)
-                    destination.setRGB(iPrime, jPrime, source.getRGB(i, j));
-            }
-        }
-
-        return destination;
+    
+        // Calcul de la nouvelle taille pour contenir l'image entière
+        int newWidth = (int) Math.round(Math.abs(width * Math.cos(angleRadians)) + Math.abs(height * Math.sin(angleRadians)));
+        int newHeight = (int) Math.round(Math.abs(height * Math.cos(angleRadians)) + Math.abs(width * Math.sin(angleRadians)));
+    
+        // Créer une image avec transparence pour la nouvelle taille
+        BufferedImage result = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = result.createGraphics();
+    
+        // Activer des rendus de haute qualité
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    
+        // Remplir le fond avec la transparence
+        g2d.setComposite(AlphaComposite.Clear);
+        g2d.fillRect(0, 0, newWidth, newHeight);
+    
+        // Réinitialiser la transparence pour dessiner l'image
+        g2d.setComposite(AlphaComposite.SrcOver);
+    
+        // Centrer l'image dans la nouvelle zone
+        g2d.translate((newWidth - width) / 2.0, (newHeight - height) / 2.0);
+    
+        // Appliquer la rotation autour du centre de l'image originale
+        g2d.rotate(angleRadians, width / 2.0, height / 2.0);
+    
+        // Dessiner l'image d'origine
+        g2d.drawRenderedImage(source, null);
+    
+        g2d.dispose();
+        return result;
     }
+    
+    
 
     public BufferedImage flipImage(BufferedImage image, boolean horizontal) {
         int width = image.getWidth();

@@ -29,7 +29,7 @@ public class ImageController {
     public void openNewView(BufferedImage image) {
         ImageView newView = new ImageView(this); // Crée une nouvelle vue
         if (image != null) {
-            newView.updateImage(image); // Charge l'image si elle est fournie
+            newView.updateImage(image,false); // Charge l'image si elle est fournie
         }
         views.add(newView); // Ajoute la vue à la liste
         setActiveView(newView);
@@ -38,7 +38,7 @@ public class ImageController {
     public void openImage(File file) {
         try {
             if (activeView.getImage() == null) {
-                activeView.updateImage(model.loadImageFromFile(file)); // Ferme la fenêtre active
+                activeView.updateImage(model.loadImageFromFile(file),false); // Ferme la fenêtre active
             } else {
                 openNewView(model.loadImageFromFile(file));
             } // Crée une nouvelle fenêtre avec l'image
